@@ -671,6 +671,31 @@ PyMidiMessage_getControllerName(PyObject *, PyObject *args)
 	return PK_STRING(MidiMessage::getControllerName(controllerNumber));
 }
 
+static PyObject *
+PyMidiMessage_str(PyObject *self) {
+  MidiMessage *m = ((PyMidiMessage*)self)->m;
+  static char s[256];
+  if(m->isNoteOn()) {
+    sprintf(s, "<NOTE ON, %s (note %d), velocity: %d, channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getVelocity(), m->getChannel());
+  } else if(m->isNoteOff()) {
+    sprintf(s, "<NOTE OFF, %s (%d), channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getChannel());
+  } else if(m->isProgramChange()) {
+    sprintf(s, "<PROGRAM CHANGE: program: %d, channel: %d>", m->getProgramChangeNumber(), m->getChannel());
+  } else if(m->isPitchWheel()) {
+    sprintf(s, "<PITCH WHEEL: value: %d, channel: %d>", m->getPitchWheelValue(), m->getChannel());
+  } else if(m->isAftertouch()) {
+    sprintf(s, "<AFTERTOUCH: value: %d, channel: %d>", m->getAfterTouchValue(), m->getChannel());
+  } else if(m->isChannelPressure()) {
+    sprintf(s, "<CHANNEL PRESSURE: pressure: %d, channel: %d>", m->getChannelPressureValue(), m->getChannel());
+  } else if(m->isController()) {
+    sprintf(s, "<CONTROLLER: \"%s\" (CC %d), value: %d, channel: %d>", m->getControllerName(m->getControllerNumber()), m->getControllerNumber(), m->getControllerValue(), m->getChannel());
+  } else {
+    sprintf(s, "<MidiMessage (misc type)>");
+  }
+
+  return PK_STRING(s);
+}
+
 
 /* TODO: 
  
@@ -861,7 +886,7 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /* tp_as_mapping */
   0,                         /* tp_hash  */
   0,                         /* tp_call */
-  0,                         /* tp_str */
+  PyMidiMessage_str,                         /* tp_str */
   0,                         /* tp_getattro */
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
@@ -904,7 +929,7 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /*tp_as_mapping*/
   0,                         /*tp_hash */
   0,                         /*tp_call*/
-  0,                         /*tp_str*/
+  PyMidiMessage_str,                         /*tp_str*/
   0,                         /*tp_getattro*/
   0,                         /*tp_setattro*/
   0,                         /*tp_as_buffer*/
@@ -928,7 +953,7 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /* tp_alloc */
   PyMidiMessage_new                 /* tp_new */
 };
-#endif;
+#endif
 
 PyTypeObject *getMidiMessageType()
 {
