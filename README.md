@@ -139,7 +139,6 @@ Common Problems
 -----------------
 
 This is a commonly reported build error on linux, although I it works for me using python2.7 on ubuntu.
-=======
 
 ```
 :~/devel/pkaudio/pyrtmidi/tests$ python test_rtmidi.py 
