@@ -327,7 +327,9 @@ PyMidiMessage_noteOn(PyMidiMessage *, PyObject *args)
   uint8 velocity = -1;
   if(!PyArg_ParseTuple(args, "iiH", &channel, &noteNumber, &velocity))
     return NULL;
-  
+    
+  PyObject *pyNoteNumber = PyTuple_GetItem(args, 1);
+  noteNumber = (int) PyLong_AsLong(pyNoteNumber); // no idea why PyArg_ParseTuple is setting *only* noteNumber to zero...
   return PyMidiMessage_FromMidiMessage(MidiMessage::noteOn(channel, noteNumber, velocity));
 }
 

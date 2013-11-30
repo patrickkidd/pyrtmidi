@@ -76,7 +76,7 @@ static void MidiIn_callback(double timestamp, std::vector<unsigned char> *messag
   uint8 *data = (uint8*) malloc(message->size());
   for(size_t i=0; i < message->size(); i++)
     data[i] = (*message)[i];  
-  MidiMessage inMidi(data, message->size(), timestamp);
+  MidiMessage inMidi(data, (int) message->size(), timestamp);
   free(data);
 
 #if PK_WINDOWS
