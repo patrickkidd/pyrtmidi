@@ -19,6 +19,7 @@
  */
 
 #include "PyMidiMessage.h"
+#include <RtMidi.h>
 #include <Python.h>
 #include <queue>
 
@@ -249,7 +250,7 @@ MidiIn_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     {
       try
       {
-        self->rtmidi = new RtMidiIn(name);
+        self->rtmidi = new RtMidiIn();
       }
       catch(RtMidiError &error)
       {
