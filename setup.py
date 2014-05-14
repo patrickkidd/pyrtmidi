@@ -27,9 +27,7 @@ midi = Extension(
         'PyMidiMessage.cpp',
         'rtmidimodule.cpp'
     ],
-    library_dirs=['/usr/local/lib'],
     libraries=['rtmidi'],
-    include_dirs=['/usr/local/include'],
 )
 
 setup(
