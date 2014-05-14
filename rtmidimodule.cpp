@@ -626,7 +626,7 @@ MidiOut_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     {
       try
       {
-        self->rtmidi = new RtMidiOut(name);
+        self->rtmidi = new RtMidiOut();
       }
       catch(RtMidiError &error)
       {
