@@ -750,7 +750,7 @@ MidiOut_getPortName(MidiOut *self, PyObject *args)
   }
   catch(RtMidiError &error)
   {
-    PyErr_SetString(PyRtMidiError, error->getMessage());
+    PyErr_SetString(PyRtMidiError, error.getMessage());
     return NULL;
   }
 
@@ -785,7 +785,7 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   }
   catch(RtMidiError &error)
   {
-    PyErr_SetString(PyRtMidiError, error->getMessage());
+    PyErr_SetString(PyRtMidiError, error.getMessage());
     return NULL;
   }
 
