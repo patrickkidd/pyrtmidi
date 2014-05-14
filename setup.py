@@ -18,48 +18,23 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
-import os
 from distutils.core import setup, Extension
 
-if hasattr(os, 'uname'):
-    OSNAME = os.uname()[0]
-else:
-    OSNAME = 'Windows'
+midi = Extension(
+    'rtmidi',
+    sources=[
+        'MidiMessage.cpp',
+        'PyMidiMessage.cpp',
+        'rtmidimodule.cpp'
+    ],
+    library_dirs=['/usr/local/lib'],
+    libraries=['rtmidi'],
+    include_dirs=['/usr/local/include'],
+)
 
-
-define_macros = []
-libraries = []
-extra_link_args = []
-extra_compile_args = []
-
-if OSNAME == 'Linux':
-    define_macros = [("__LINUX_ALSASEQ__", '')]
-    libraries = ['asound', 'pthread']
-elif OSNAME == 'Darwin':
-    define_macros = [('__MACOSX_CORE__', '')]
-    libraries = ['pthread']
-    extra_link_args = ['-framework', 'CoreAudio',
-                       '-framework', 'CoreMidi',
-                       '-framework', 'CoreFoundation']
-elif OSNAME == 'Windows':
-    define_macros = [('__WINDOWS_MM__', '')]
-    libraries = ['C:\Program Files\Microsoft Platform SDK for' +
-                 'Windows Server 2003 R2\Lib\winmm.lib', 'winmm']
-elif OSNAME == 'Irix':
-    define_macros = [('__IRIX_MD__', '')]
-    libraries = ['pthread', 'md']
-
-midi = Extension('rtmidi',
-                 sources=['PyMidiMessage.cpp',
-                          'rtmidimodule.cpp',
-                          ],
-                 libraries=libraries,
-                 define_macros=define_macros,
-                 extra_link_args=extra_link_args,
-                 )
-
-
-setup(name='rtmidi',
-      version='0.2',
-      description='Python RtMidi interface',
-      ext_modules=[midi])
+setup(
+    name='rtmidi',
+    version='0.2.1',
+    description='Python RtMidi interface',
+    ext_modules=[midi]
+)
