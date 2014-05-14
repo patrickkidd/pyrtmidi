@@ -241,7 +241,7 @@ MidiIn_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
       }
       catch(RtMidiError &error)
       {
-        PyErr_SetString(PyRtMidiError, error.getMessage());
+        PyErr_SetString(PyRtMidiError, error.what());
         Py_DECREF(self);
         return NULL;
       }
@@ -254,7 +254,7 @@ MidiIn_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
       }
       catch(RtMidiError &error)
       {
-        PyErr_SetString(PyRtMidiError, error.getMessage());
+        PyErr_SetString(PyRtMidiError, error.what());
         Py_DECREF(self);
         return NULL;
       }
@@ -328,7 +328,7 @@ MidiIn_openPort(MidiIn *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -341,7 +341,7 @@ MidiIn_openPort(MidiIn *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -369,7 +369,7 @@ MidiIn_openVirtualPort(MidiIn *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -381,7 +381,7 @@ MidiIn_openVirtualPort(MidiIn *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -466,7 +466,7 @@ MidiIn_getPortName(MidiIn *self, PyObject *args)
   }
   catch(RtMidiError &error)
   {
-    PyErr_SetString(PyRtMidiError, error.getMessage());
+    PyErr_SetString(PyRtMidiError, error.what());
     return NULL;
   }
 
@@ -617,7 +617,7 @@ MidiOut_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
       }
       catch(RtMidiError &error)
       {
-        PyErr_SetString(PyRtMidiError, error.getMessage());
+        PyErr_SetString(PyRtMidiError, error.what());
         Py_DECREF(self);
         return NULL;
       }
@@ -630,7 +630,7 @@ MidiOut_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
       }
       catch(RtMidiError &error)
       {
-        PyErr_SetString(PyRtMidiError, error.getMessage());
+        PyErr_SetString(PyRtMidiError, error.what());
         Py_DECREF(self);
         return NULL;
       }
@@ -662,7 +662,7 @@ MidiOut_openPort(MidiOut *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   else
@@ -673,7 +673,7 @@ MidiOut_openPort(MidiOut *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -698,7 +698,7 @@ MidiOut_openVirtualPort(MidiOut *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -710,7 +710,7 @@ MidiOut_openVirtualPort(MidiOut *self, PyObject *args)
     }
     catch(RtMidiError &error)
     {
-      PyErr_SetString(PyRtMidiError, error.getMessage());
+      PyErr_SetString(PyRtMidiError, error.what());
       return NULL;
     }
   }
@@ -750,7 +750,7 @@ MidiOut_getPortName(MidiOut *self, PyObject *args)
   }
   catch(RtMidiError &error)
   {
-    PyErr_SetString(PyRtMidiError, error.getMessage());
+    PyErr_SetString(PyRtMidiError, error.what());
     return NULL;
   }
 
@@ -785,7 +785,7 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   }
   catch(RtMidiError &error)
   {
-    PyErr_SetString(PyRtMidiError, error.getMessage());
+    PyErr_SetString(PyRtMidiError, error.what());
     return NULL;
   }
 
