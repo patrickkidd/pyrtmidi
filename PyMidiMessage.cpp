@@ -58,24 +58,13 @@ PyMidiMessage_init(MidiMessage *, PyObject *, PyObject *)
   return 0;
 }
 
-#define midi ((PyMidiMessage *)self)->m
-#if OUSIA_SCRIPT_PYTHON3
-#define PK_BOOL(x) PyBool_FromLong(x)
-#define PK_INT(x) PyInt_FromLong(x)
-#define PK_FLOAT(x) PyFloat_FromDouble(x)
-#define PK_STRING(x) PyUnicode_FromString(x)
-#else
-#define PK_BOOL(x) PyBool_FromLong(x)
-#define PK_INT(x) PyInt_FromLong(x)
-#define PK_FLOAT(x) PyFloat_FromDouble(x)
-#define PK_STRING(x) PyString_FromString(x)
-#endif
+
 
 
 static PyObject *
 PyMidiMessage_getTimeStamp(PyObject *self, PyObject *)
 {
-  return PK_FLOAT(midi->getTimeStamp());
+  return PK_FLOAT(__midi->getTimeStamp());
 }
 
 static PyObject *
@@ -85,7 +74,7 @@ PyMidiMessage_setTimeStamp(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "d", &ts))
     return NULL;
   
-  midi->setTimeStamp(ts);
+  __midi->setTimeStamp(ts);
   
   Py_RETURN_NONE;
 }
@@ -98,7 +87,7 @@ PyMidiMessage_addToTimeStamp(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "d", &ts))
     return NULL;
   
-  midi->addToTimeStamp(ts);
+  __midi->addToTimeStamp(ts);
   
   Py_RETURN_NONE;
 }
@@ -107,7 +96,7 @@ PyMidiMessage_addToTimeStamp(PyObject *self, PyObject *args)
 static PyObject *
 PyMidiMessage_getChannel(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getChannel());
+  return PK_INT(__midi->getChannel());
 }
 
 
@@ -118,7 +107,7 @@ PyMidiMessage_isForChannel(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "i", &x))
     return NULL;
   
-  return PK_BOOL(midi->isForChannel(x));
+  return PK_BOOL(__midi->isForChannel(x));
 }
 
 static PyObject *
@@ -128,7 +117,7 @@ PyMidiMessage_setChannel(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "i", &x))
     return NULL;
   
-  midi->setChannel(x);
+  __midi->setChannel(x);
   
   Py_RETURN_NONE;
 }
@@ -136,31 +125,31 @@ PyMidiMessage_setChannel(PyObject *self, PyObject *args)
 static PyObject *
 PyMidiMessage_isSysEx(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isSysEx());
+  return PK_BOOL(__midi->isSysEx());
 }
 
 static PyObject *
 PyMidiMessage_isNoteOn(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isNoteOn());
+  return PK_BOOL(__midi->isNoteOn());
 }
 
 static PyObject *
 PyMidiMessage_isNoteOff(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isNoteOff());
+  return PK_BOOL(__midi->isNoteOff());
 }
 
 static PyObject *
 PyMidiMessage_isNoteOnOrOff(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isNoteOnOrOff());
+  return PK_BOOL(__midi->isNoteOnOrOff());
 }
 
 static PyObject *
 PyMidiMessage_getNoteNumber(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getNoteNumber());
+  return PK_INT(__midi->getNoteNumber());
 }
 
 static PyObject *
@@ -170,7 +159,7 @@ PyMidiMessage_setNoteNumber(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "i", &note))
     return NULL;
   
-  midi->setNoteNumber(note);
+  __midi->setNoteNumber(note);
   
   Py_RETURN_NONE;
 }
@@ -178,13 +167,13 @@ PyMidiMessage_setNoteNumber(PyObject *self, PyObject *args)
 static PyObject *
 PyMidiMessage_getVelocity(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getVelocity());
+  return PK_INT(__midi->getVelocity());
 }
 
 static PyObject *
 PyMidiMessage_getFloatVelocity(PyObject *self, PyObject *)
 {
-  return PK_FLOAT(midi->getFloatVelocity());
+  return PK_FLOAT(__midi->getFloatVelocity());
 }
 
 
@@ -195,7 +184,7 @@ PyMidiMessage_setVelocity(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "f", &x))
     return NULL;
   
-  midi->setVelocity(x);
+  __midi->setVelocity(x);
   
   Py_RETURN_NONE;
 }
@@ -207,7 +196,7 @@ PyMidiMessage_multiplyVelocity(PyObject *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "f", &x))
     return NULL;
   
-  midi->multiplyVelocity(x);
+  __midi->multiplyVelocity(x);
   
   Py_RETURN_NONE;
 }
@@ -215,87 +204,87 @@ PyMidiMessage_multiplyVelocity(PyObject *self, PyObject *args)
 static PyObject *
 PyMidiMessage_isProgramChange(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isProgramChange());
+  return PK_BOOL(__midi->isProgramChange());
 }
 
 static PyObject *
 PyMidiMessage_getProgramChangeNumber(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getProgramChangeNumber());
+  return PK_INT(__midi->getProgramChangeNumber());
 }
 
 static PyObject *
 PyMidiMessage_isPitchWheel(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isPitchWheel());
+  return PK_BOOL(__midi->isPitchWheel());
 }
 
 
 static PyObject *
 PyMidiMessage_getPitchWheelValue(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getPitchWheelValue());
+  return PK_INT(__midi->getPitchWheelValue());
 }
 
 static PyObject *
 PyMidiMessage_isAftertouch(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isAftertouch());
+  return PK_BOOL(__midi->isAftertouch());
 }
 
 static PyObject *
 PyMidiMessage_getAfterTouchValue(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getAfterTouchValue());
+  return PK_INT(__midi->getAfterTouchValue());
 }
 
 static PyObject *
 PyMidiMessage_isChannelPressure(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isChannelPressure());
+  return PK_BOOL(__midi->isChannelPressure());
 }
 
 static PyObject *
 PyMidiMessage_getChannelPressureValue(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getChannelPressureValue());
+  return PK_INT(__midi->getChannelPressureValue());
 }
 
 static PyObject *
 PyMidiMessage_isController(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isController());
+  return PK_BOOL(__midi->isController());
 }
 
 static PyObject *
 PyMidiMessage_getControllerNumber(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getControllerNumber());
+  return PK_INT(__midi->getControllerNumber());
 }
 
 
 static PyObject *
 PyMidiMessage_getControllerValue(PyObject *self, PyObject *)
 {
-  return PK_INT(midi->getControllerValue());
+  return PK_INT(__midi->getControllerValue());
 }
 
 static PyObject *
 PyMidiMessage_isAllNotesOff(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isAllNotesOff());
+  return PK_BOOL(__midi->isAllNotesOff());
 }
 
 static PyObject *
 PyMidiMessage_isAllSoundOff(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isAllSoundOff());
+  return PK_BOOL(__midi->isAllSoundOff());
 }
 
 static PyObject *
 PyMidiMessage_isActiveSense(PyObject *self, PyObject *)
 {
-  return PK_BOOL(midi->isAllSoundOff());
+  return PK_BOOL(__midi->isAllSoundOff());
 }
 
 
@@ -303,9 +292,9 @@ static PyObject *
 PyMidiMessage_getRawData(PyMidiMessage *self, PyObject *)
 {
 #if OUSIA_SCRIPT_PYTHON3
-  return PyBytes_FromStringAndSize((const char *) midi->getRawData(), midi->getRawDataSize());
+  return PyBytes_FromStringAndSize((const char *) __midi->getRawData(), __midi->getRawDataSize());
 #else
-  return PyString_FromStringAndSize((const char *) midi->getRawData(), midi->getRawDataSize());
+  return PyString_FromStringAndSize((const char *) __midi->getRawData(), __midi->getRawDataSize());
 #endif  
 }
 
@@ -313,9 +302,9 @@ static PyObject *
 PyMidiMessage_getSysExData(PyMidiMessage *self, PyObject *)
 {
 #if OUSIA_SCRIPT_PYTHON3
-  return PyBytes_FromStringAndSize((const char *) midi->getSysExData(), midi->getSysExDataSize());
+  return PyBytes_FromStringAndSize((const char *) __midi->getSysExData(), __midi->getSysExDataSize());
 #else
-  return PyString_FromStringAndSize((const char *) midi->getSysExData(), midi->getSysExDataSize());
+  return PyString_FromStringAndSize((const char *) __midi->getSysExData(), __midi->getSysExDataSize());
 #endif  
 }
 

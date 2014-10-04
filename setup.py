@@ -18,7 +18,7 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
 
 
-import os
+import os, sys
 from distutils.core import setup, Extension
 
 if hasattr(os, 'uname'):
@@ -42,35 +42,34 @@ elif OSNAME == 'Darwin':
                        '-framework', 'CoreMidi',
                        '-framework', 'CoreFoundation']    
 elif OSNAME == 'Windows':
-    define_macros = [('__WINDOWS_MM__', '')]
-    libraries = ['C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib\winmm.lib', 'winmm']
-#    extra_link_args = ['-L'+i for i in sys.path if os.path.isdir(i)]
-#    if os.path.isdir("C:\\Program\ Files\\ (x86)\\Microsoft\ Visual\ Studio 8\\VC\\PlatformSDK\\Lib"):
-#        extra_link_args.append('-L"C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib"')
-#    if os.path.isdir("C:\\Program\ Files\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib"):
-#        extra_link_args.append('-L"C:\\Program\ Files\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib"')
-#    if os.path.isdir("C:\\Program\ Files\\ (x86)\\Microsoft\ Visual\ Studio 8\\VC\\PlatformSDK\\Lib\\AMD64"):
-#        extra_link_args.append('-L"C:\\Program\ Files\ (x86)\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib\\AMD64"')
-#    if os.path.isdir("C:\\Program\ Files\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib\\AMD64"):
-#        extra_link_args.append('-L"C:\\Program\ Files\\Microsoft\ Visual\ Studio\ 8\\VC\\PlatformSDK\\Lib\\AMD64"')
+    define_macros = [('__WINDOWS_MM__', ''),
+                     ('PK_WINDOWS', '1')]
+    library_dirs = ['C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib']
+    libraries = ['winmm']
+    extra_compile_args=['/EHsc']
 elif OSNAME == 'Irix':
     define_macros = [('__IRIX_MD__', '')]
     libraries = ['pthread', 'md']
 
+if sys.version_info >= (3,0):
+	define_macros.append(('OUSIA_SCRIPT_PYTHON3','1'))
+	
 midi = Extension('rtmidi',
                  sources=['RtMidi.cpp',
                           'MidiMessage.cpp',
                           'PyMidiMessage.cpp',
                           'rtmidimodule.cpp',
                           ],
+                 library_dirs=library_dirs,
                  libraries=libraries,
                  define_macros=define_macros,
                  extra_link_args = extra_link_args,
+				 extra_compile_args = extra_compile_args
                  )
 
 
 setup(name = 'rtmidi',
-      version = '0.1',
+      version = '0.2',
       description = 'Python RtMidi interface',
       ext_modules = [midi])
 

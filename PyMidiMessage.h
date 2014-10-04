@@ -21,6 +21,19 @@
 #include <Python.h>
 #include "MidiMessage.h"
 
+#define __midi ((PyMidiMessage *)self)->m
+
+#if OUSIA_SCRIPT_PYTHON3
+#define PK_BOOL(x) PyBool_FromLong(x)
+#define PK_INT(x) PyLong_FromLong(x)
+#define PK_FLOAT(x) PyFloat_FromDouble(x)
+#define PK_STRING(x) PyUnicode_FromString(x)
+#else
+#define PK_BOOL(x) PyBool_FromLong(x)
+#define PK_INT(x) PyInt_FromLong(x)
+#define PK_FLOAT(x) PyFloat_FromDouble(x)
+#define PK_STRING(x) PyString_FromString(x)
+#endif
 
 
 typedef struct {

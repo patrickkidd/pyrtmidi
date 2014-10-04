@@ -43,18 +43,23 @@
 #define PK_PYTHON3 0
 #endif
 
+#if PK_WINDOWS
+#include <windows.h>
+//typedef void *HANDLE;
+#endif
 
   
 static PyObject *RtMidiError;
 
 typedef struct
 {
-  PyObject_HEAD
+  PyObject_HEAD;
   
   RtMidiIn *rtmidi;
   PyObject *callback;
   long calling_thread_id;
   std::queue<MidiMessage *> *m_q;
+  bool triggered;
 
 #if PK_WINDOWS
   HANDLE mutex;
@@ -62,7 +67,6 @@ typedef struct
 #else
   pthread_mutex_t mutex;
   pthread_cond_t cond;
-  bool triggered;
 #endif
     
 } MidiIn;
@@ -80,7 +84,7 @@ static void MidiIn_callback(double timestamp, std::vector<unsigned char> *messag
   free(data);
 
 #if PK_WINDOWS
-  WaitForSingleObject(self->mutex);
+  WaitForSingleObject(self->mutex, INFINITE);
 #else
   pthread_mutex_lock(&self->mutex);
 #endif
@@ -159,7 +163,7 @@ MidiIn_getMessage(MidiIn *self, PyObject *args)
   }
   
 #if PK_WINDOWS
-  WaitForSingleObject(self->mutex);
+  WaitForSingleObject(self->mutex, INFINITE);
 #else
   pthread_mutex_lock(&self->mutex);    
 #endif
@@ -290,7 +294,6 @@ MidiIn_dealloc(MidiIn *self)
   self->m_q = NULL;
   Py_XDECREF(self->callback);
   self->callback = NULL;
-  self->ob_type->tp_free((PyObject *) self);
   
 #if PK_WINDOWS
   ReleaseMutex(self->mutex);
@@ -300,6 +303,12 @@ MidiIn_dealloc(MidiIn *self)
   pthread_mutex_unlock(&self->mutex);  
   pthread_mutex_destroy(&self->mutex);
   pthread_cond_destroy(&self->cond);
+#endif
+
+#if PK_PYTHON3
+  Py_TYPE(self)->tp_free((PyObject *) self);
+#else
+  self->ob_type->tp_free((PyObject *) self);
 #endif
 
 }
@@ -447,7 +456,7 @@ MidiIn_closePort(MidiIn *self, PyObject *)
 static PyObject *
 MidiIn_getPortCount(MidiIn *self, PyObject *)
 {
-  return PyInt_FromLong(self->rtmidi->getPortCount());
+  return PK_INT(self->rtmidi->getPortCount());
 }
 
 
@@ -502,9 +511,9 @@ MidiIn_ignoreTypes(MidiIn *self, PyObject *args)
   if(!PyArg_ParseTuple(args, "|OOO", &omidiSysex, &omidiTime, &omidiSense))
     return NULL;
   
-  midiSysex = PyObject_IsTrue(omidiSysex);
-  midiTime = PyObject_IsTrue(omidiTime);
-  midiSense = PyObject_IsTrue(omidiSense);
+  midiSysex = PyObject_IsTrue(omidiSysex) == 1;
+  midiTime = PyObject_IsTrue(omidiTime) == 1;
+  midiSense = PyObject_IsTrue(omidiSense) == 1;
   
   self->rtmidi->ignoreTypes(midiSysex, midiTime, midiSense);
   
@@ -554,8 +563,10 @@ static PyMethodDef MidiIn_methods[] = {
 
 static PyTypeObject MidiIn_type = {
   PyObject_HEAD_INIT(NULL)
+#if ! PK_PYTHON3
   0,                         /*ob_size*/
-  "midi.RtMidiIn",             /*tp_name*/
+#endif
+  "midi.RtMidiIn",           /*tp_name*/
   sizeof(MidiIn), /*tp_basicsize*/
   0,                         /*tp_itemsize*/
   (destructor) MidiIn_dealloc,                         /*tp_dealloc*/
@@ -610,7 +621,11 @@ static void
 MidiOut_dealloc(MidiOut *self)
 {
   delete self->rtmidi;
+#if PK_PYTHON3
+  Py_TYPE(self)->tp_free((PyObject *) self);
+#else
   self->ob_type->tp_free((PyObject *) self);
+#endif
 }
 
 
@@ -835,7 +850,9 @@ static PyMethodDef MidiOut_methods[] = {
 
 static PyTypeObject MidiOut_type = {
   PyObject_HEAD_INIT(NULL)
+#if ! PK_PYTHON3
   0,                         /*ob_size*/
+#endif
   "midi.RtMidiOut",             /*tp_name*/
   sizeof(MidiOut), /*tp_basicsize*/
   0,                         /*tp_itemsize*/
@@ -883,24 +900,59 @@ static PyMethodDef midi_methods[] = {
 };
 
 
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "rtmidi",     /* m_name */
+    "RtMidi wrapper",  /* m_doc */
+    -1,                  /* m_size */
+    midi_methods,    /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
+#endif
+
+
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC
-initrtmidi(void) 
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit_rtmidi(void) 
+#else
+PyMODINIT_FUNC initrtmidi(void) 
+#endif
 {
   PyEval_InitThreads();
   
   PyObject* module;
   
   if (PyType_Ready(getMidiMessageType()) < 0)
+#if PK_PYTHON3
+    return 0;
+#else
     return;
+#endif
   if (PyType_Ready(&MidiIn_type) < 0)
+#if PK_PYTHON3
+    return 0;
+#else
     return;
+#endif
   if (PyType_Ready(&MidiOut_type) < 0)
+#if PK_PYTHON3
+    return 0;
+#else
     return;
+#endif
   
-  module = Py_InitModule3("rtmidi", midi_methods, "RtMidi wrapper.");
+#if PY_MAJOR_VERSION >= 3
+  module = PyModule_Create(&moduledef);
+#else
+  module = Py_InitModule3("rtmidi", midi_methods, "RtMidi wrapper");
+#endif
   
   Py_INCREF((PyObject*) getMidiMessageType());
   PyModule_AddObject(module, "MidiMessage", (PyObject*) getMidiMessageType());
@@ -912,8 +964,16 @@ initrtmidi(void)
   PyModule_AddObject(module, "RtMidiOut", (PyObject *)&MidiOut_type);
   
   char eName[32];
+#if PK_WINDOWS
+  strcpy_s(eName, "rtmidi.Error");
+#else
   strcpy(eName, "rtmidi.Error");
+#endif
   RtMidiError = PyErr_NewException(eName, NULL, NULL);
   Py_INCREF(RtMidiError);
   PyModule_AddObject(module, "Error", RtMidiError);  
+
+#if PK_PYTHON3
+    return module;
+#endif  
 }
