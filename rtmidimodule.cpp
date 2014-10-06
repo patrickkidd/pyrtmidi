@@ -20,33 +20,9 @@
 
 #include "RtMidi.h"
 #include "PyMidiMessage.h"
-#include <Python.h>
+#include "pkglobals.h"
 #include <queue>
 
-#ifndef Py_RETURN_NONE
-#define Py_RETURN_NONE Py_INCREF(Py_None); return Py_None;
-#endif
-
-#ifdef __APPLE__
-#define PK_WINDOWS 0
-#endif
-#ifdef __LINUX__
-#define PK_WINDOWS 0
-#endif
-#ifdef __WINDOWS__
-#define PK_WINDOWS 1
-#endif
-
-#if PY_MAJOR_VERSION == 3
-#define PK_PYTHON3 1
-#else
-#define PK_PYTHON3 0
-#endif
-
-#if PK_WINDOWS
-#include <windows.h>
-//typedef void *HANDLE;
-#endif
 
   
 static PyObject *RtMidiError;
@@ -900,7 +876,7 @@ static PyMethodDef midi_methods[] = {
 };
 
 
-#if PY_MAJOR_VERSION >= 3
+#if PK_PYTHON3
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     "rtmidi",     /* m_name */
@@ -919,7 +895,7 @@ static struct PyModuleDef moduledef = {
 #define PyMODINIT_FUNC void
 #endif
 
-#if PY_MAJOR_VERSION >= 3
+#if PK_PYTHON3
 PyMODINIT_FUNC PyInit_rtmidi(void) 
 #else
 PyMODINIT_FUNC initrtmidi(void) 
@@ -948,7 +924,7 @@ PyMODINIT_FUNC initrtmidi(void)
     return;
 #endif
   
-#if PY_MAJOR_VERSION >= 3
+#if PK_PYTHON3
   module = PyModule_Create(&moduledef);
 #else
   module = Py_InitModule3("rtmidi", midi_methods, "RtMidi wrapper");

@@ -893,6 +893,10 @@ public:
     */
     static const char *getControllerName (int controllerNumber) throw();
 
+    /** Returns whether the midi message is of the same type and has
+        the same value.
+    */
+    bool operator==(const MidiMessage &) const throw();
 
 private:
     double timeStamp;

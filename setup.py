@@ -31,6 +31,7 @@ define_macros = []
 libraries = []
 extra_link_args = []
 extra_compile_args = []
+library_dirs = []
 
 if OSNAME == 'Linux':
     define_macros=[("__LINUX_ALSASEQ__", '')]

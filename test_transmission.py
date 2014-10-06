@@ -26,10 +26,11 @@ midiout.openVirtualPort("pyrtmidi unit test virtual midi port")
 import threading
 class MidiReceiver(threading.Thread): 
 	def __init__(self): 
-		threading.Thread.__init__(self) 
+                threading.Thread.__init__(self) 
+                self.running = True
  
 	def run(self): 
-		print 'Receiver thread started...'
+		print('Receiver thread started...')
 
 		# Setup Receiver
 		import rtmidi
@@ -37,18 +38,18 @@ class MidiReceiver(threading.Thread):
 		ports = range(self.midiin.getPortCount())
 		if ports:
 			for i in ports:
-				print 'Receiving from midi port "%s"' % self.midiin.getPortName(i)
+				print('Receiving from midi port "%s"' % self.midiin.getPortName(i))
 			self.midiin.openPort(len(ports)-1)
-			while True:
+			while self.running:
 				message = self.midiin.getMessage(250) # some timeout in ms
 				if message != None:
-					print message, '(received)'
+					print(message, '(received)')
 		else:
-			print 'NO MIDI INPUT PORTS!'
+			print('NO MIDI INPUT PORTS!')
 
 	def stopReceiving(self):
 		self.midiin.closePort()
-		self._Thread__stop()
+		self.running = False
 		
 
 receiver = MidiReceiver()
@@ -57,8 +58,8 @@ receiver.start()
 
 # Transmitting
 time.sleep(0.1)
-print
-print 'Now transmitting messages...'
+print()
+print('Now transmitting messages...')
 3,
 
 # Send messages
@@ -108,13 +109,13 @@ messages = (
 	)
 
 
-print 'First line: transmitted message, second line: received message.\nIf both lines are identical, the transmission has been successful.'
+print('First line: transmitted message, second line: received message.\nIf both lines are identical, the transmission has been successful.')
 for checkfunction, message in messages:
-	print
-#	print message.__name__
+	print()
+#	print(message.__name__)
 	if checkfunction:
-		exec('print "Correct message type:", message.%s()' % (checkfunction)) 
-	print message, '(transmitted)'
+		exec('print("Correct message type:", message.%s())' % (checkfunction)) 
+	print(message, '(transmitted)')
 	midiout.sendMessage(message)
 	time.sleep(0.1)
 

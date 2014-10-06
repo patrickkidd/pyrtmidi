@@ -1161,3 +1161,13 @@ const char *MidiMessage::getControllerName (int n) throw()
     return (((unsigned int) n) < 128) ? names[n] : 0;
 }
 
+bool MidiMessage::operator==(const MidiMessage &other) const throw() {
+  if(size != other.size)
+    return false;
+  for(int i=0; i < size; i++) {
+    if(data[i] != other.data[i]) {
+      return false;
+    }
+  }
+  return true;
+}

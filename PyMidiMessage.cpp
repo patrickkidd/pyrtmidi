@@ -20,7 +20,19 @@
 
 
 #include <Python.h>
+#include "pkglobals.h"
 #include "PyMidiMessage.h"
+
+
+#define __midi ((PyMidiMessage *)self)->m
+
+
+PyObject *PyMidiMessage_FromMidiMessage(const MidiMessage &m)
+{
+  PyMidiMessage *result = (PyMidiMessage *) PyMidiMessage_new();
+  *(result->m) = m;
+  return (PyObject *) result;
+}
 
 
 // MidiMessage class wrapper
@@ -29,7 +41,7 @@ static void
 PyMidiMessage_dealloc(PyMidiMessage* self)
 {
   delete self->m;
-#if OUSIA_SCRIPT_PYTHON3
+#if PK_PYTHON3
   Py_TYPE(self)->tp_free((PyObject*)self);
 #else
   self->ob_type->tp_free((PyObject*)self);
@@ -291,7 +303,7 @@ PyMidiMessage_isActiveSense(PyObject *self, PyObject *)
 static PyObject *
 PyMidiMessage_getRawData(PyMidiMessage *self, PyObject *)
 {
-#if OUSIA_SCRIPT_PYTHON3
+#if PK_PYTHON3
   return PyBytes_FromStringAndSize((const char *) __midi->getRawData(), __midi->getRawDataSize());
 #else
   return PyString_FromStringAndSize((const char *) __midi->getRawData(), __midi->getRawDataSize());
@@ -301,7 +313,7 @@ PyMidiMessage_getRawData(PyMidiMessage *self, PyObject *)
 static PyObject *
 PyMidiMessage_getSysExData(PyMidiMessage *self, PyObject *)
 {
-#if OUSIA_SCRIPT_PYTHON3
+#if PK_PYTHON3
   return PyBytes_FromStringAndSize((const char *) __midi->getSysExData(), __midi->getSysExDataSize());
 #else
   return PyString_FromStringAndSize((const char *) __midi->getSysExData(), __midi->getSysExDataSize());
@@ -687,6 +699,35 @@ PyMidiMessage_str(PyObject *self) {
   return PK_STRING(s);
 }
 
+PyObject *PyMidiMessage___eq__(PyObject *self, PyObject *other, int op) {
+
+  PyObject *result = NULL;
+  
+  if(!PyMidiMessage_Check(other)) {
+    result = Py_False;
+  } else {
+    MidiMessage &me = *((PyMidiMessage *) self)->m;
+    MidiMessage &him = *((PyMidiMessage *) other)->m;
+    switch (op) {
+    case Py_EQ:
+      result = (me == him) ? Py_True : Py_False;
+      break;
+    case Py_NE:
+      result = (me == him) ? Py_False : Py_True;
+      break;
+    case Py_LT:
+    case Py_LE:
+    case Py_GT:
+    case Py_GE:
+    default:
+      result = Py_NotImplemented;
+      break;
+    }
+ }
+
+  Py_XINCREF(result);
+  return result;
+}
 
 /* TODO: 
  
@@ -860,11 +901,11 @@ static PyMethodDef PyMidiMessage_methods[] = {
 };
 
 
-#if OUSIA_SCRIPT_PYTHON3
+#if PK_PYTHON3
 static PyTypeObject PyMidiMessage_Type = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ousiainternal.MidiMessage",             /* tp_name */
-  sizeof(PyMidiMessage),             /* tp_basicsize */
+  "ousiainternal.MidiMessage", /* tp_name */
+  sizeof(PyMidiMessage),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   (destructor)PyMidiMessage_dealloc, /* tp_dealloc */
   0,                         /* tp_print */
@@ -877,37 +918,36 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /* tp_as_mapping */
   0,                         /* tp_hash  */
   0,                         /* tp_call */
-  PyMidiMessage_str,                         /* tp_str */
+  PyMidiMessage_str,         /* tp_str */
   0,                         /* tp_getattro */
   0,                         /* tp_setattro */
   0,                         /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT |
-  Py_TPFLAGS_BASETYPE,   /* tp_flags */
-  "midi message",           /* tp_doc */
-  0,		               /* tp_traverse */
-  0,		               /* tp_clear */
-  0,		               /* tp_richcompare */
-  0,		               /* tp_weaklistoffset */
-  0,		               /* tp_iter */
-  0,		               /* tp_iternext */
-  PyMidiMessage_methods,             /* tp_methods */
-  0,             /* tp_members */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /* tp_flags */
+  "midi message",            /* tp_doc */
+  0,		                     /* tp_traverse */
+  0,		                     /* tp_clear */
+  (richcmpfunc)&PyMidiMessage___eq__,		   /* tp_richcompare */
+  0,		                     /* tp_weaklistoffset */
+  0,		                     /* tp_iter */
+  0,		                     /* tp_iternext */
+  PyMidiMessage_methods,     /* tp_methods */
+  0,                         /* tp_members */
   0,                         /* tp_getset */
   0,                         /* tp_base */
   0,                         /* tp_dict */
   0,                         /* tp_descr_get */
   0,                         /* tp_descr_set */
   0,                         /* tp_dictoffset */
-  (initproc) PyMidiMessage_init,      /* tp_init */
+  (initproc) PyMidiMessage_init, /* tp_init */
   0,                         /* tp_alloc */
-  PyMidiMessage_new,                 /* tp_new */
+  PyMidiMessage_new,         /* tp_new */
 };
 #else
 static PyTypeObject PyMidiMessage_Type = {
   PyObject_HEAD_INIT(NULL)
   0,                         /*ob_size*/
-  "ousiainternal.MidiMessage",     /*tp_name*/
-  sizeof(PyMidiMessage),             /*tp_basicsize*/
+  "ousiainternal.MidiMessage",  /*tp_name*/
+  sizeof(PyMidiMessage),     /*tp_basicsize*/
   0,                         /*tp_itemsize*/
   (destructor) PyMidiMessage_dealloc,    /*tp_dealloc*/
   0,                         /*tp_print*/
@@ -920,20 +960,20 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /*tp_as_mapping*/
   0,                         /*tp_hash */
   0,                         /*tp_call*/
-  PyMidiMessage_str,                         /*tp_str*/
+  PyMidiMessage_str,         /*tp_str*/
   0,                         /*tp_getattro*/
   0,                         /*tp_setattro*/
   0,                         /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-  "midi message",           /* tp_doc */
-  0,		               /* tp_traverse */
-  0,		               /* tp_clear */
-  0,		               /* tp_richcompare */
-  0,		               /* tp_weaklistoffset */
-  0,		               /* tp_iter */
-  0,		               /* tp_iternext */
-  PyMidiMessage_methods,       /* tp_methods */
-  0, //PyMidiMessage_members,                   /* tp_members */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_RICH_COMPARE, /*tp_flags*/
+  "midi message",            /* tp_doc */
+  0,		                     /* tp_traverse */
+  0,		                     /* tp_clear */
+  PyMidiMessage___eq__,	     /* tp_richcompare */
+  0,		                     /* tp_weaklistoffset */
+  0,		                     /* tp_iter */
+  0,		                     /* tp_iternext */
+  PyMidiMessage_methods,     /* tp_methods */
+  0, //PyMidiMessage_members,/* tp_members */
   0,                         /* tp_getset */
   0,                         /* tp_base */
   0,                         /* tp_dict */
@@ -942,7 +982,7 @@ static PyTypeObject PyMidiMessage_Type = {
   0,                         /* tp_dictoffset */
   (initproc) PyMidiMessage_init,      /* tp_init */
   0,                         /* tp_alloc */
-  PyMidiMessage_new                 /* tp_new */
+  PyMidiMessage_new          /* tp_new */
 };
 #endif
 
@@ -962,9 +1002,3 @@ PyObject *PyMidiMessage_new()
 }
 
 
-PyObject *PyMidiMessage_FromMidiMessage(const MidiMessage &m)
-{
-  PyMidiMessage *result = (PyMidiMessage *) PyMidiMessage_new();
-  *(result->m) = m;
-  return (PyObject *) result;
-}

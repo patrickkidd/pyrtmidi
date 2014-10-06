@@ -18,22 +18,8 @@
  #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
  */
 
-#include <Python.h>
+#include "pkglobals.h"
 #include "MidiMessage.h"
-
-#define __midi ((PyMidiMessage *)self)->m
-
-#if OUSIA_SCRIPT_PYTHON3
-#define PK_BOOL(x) PyBool_FromLong(x)
-#define PK_INT(x) PyLong_FromLong(x)
-#define PK_FLOAT(x) PyFloat_FromDouble(x)
-#define PK_STRING(x) PyUnicode_FromString(x)
-#else
-#define PK_BOOL(x) PyBool_FromLong(x)
-#define PK_INT(x) PyInt_FromLong(x)
-#define PK_FLOAT(x) PyFloat_FromDouble(x)
-#define PK_STRING(x) PyString_FromString(x)
-#endif
 
 
 typedef struct {
@@ -45,4 +31,3 @@ typedef struct {
 PyObject *PyMidiMessage_new();
 PyTypeObject *getMidiMessageType();
 bool PyMidiMessage_Check(PyObject*);
-PyObject *PyMidiMessage_FromMidiMessage(const MidiMessage &);
