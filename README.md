@@ -3,6 +3,11 @@ pyrtmidi
 
 Realtime MIDI I/O for python.
 
+Changes
+-------------
+0.2 - Finished port to Python3 / Windows 7.
+
+
 Usage
 -------------
 
