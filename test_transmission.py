@@ -24,8 +24,8 @@ midiout.openVirtualPort("pyrtmidi unit test virtual midi port")
 
 # Receiver
 import threading
-class MidiReceiver(threading.Thread): 
-	def __init__(self): 
+class MidiReceiver(threading.Thread):
+        def __init__(self): 
                 threading.Thread.__init__(self) 
                 self.running = True
  

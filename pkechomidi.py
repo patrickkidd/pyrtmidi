@@ -1,10 +1,19 @@
 #!/usr/bin/env python
 
 import os, sys
-BUILD_PATHS = [os.path.join(os.getcwd(), 'build/lib.linux-x86_64-2.4/'),
-               os.path.join(os.getcwd(), 'build/lib.darwin-8.5.0-Power_Macintosh-2.3/'),
-               ]
+_BUILD_PATHS = [
+    os.path.join(os.getcwd(), 'build/lib.linux-x86_64-2.4/'),
+    os.path.join(os.getcwd(), 'build/lib.darwin-8.5.0-Power_Macintosh-2.3/'),
+    os.path.join(os.getcwd(), 'build/lib.macosx-10.9-x86_64-3.4'),
+]
+BUILD_PATHS = []
+for i in _BUILD_PATHS:
+    if os.path.exists(i):
+        BUILD_PATHS.append(i)
 sys.path = BUILD_PATHS + sys.path
+
+import imp
+print('LOADING MODULE: %s' % imp.find_module('rtmidi')[1])
 import rtmidi
 import threading
 

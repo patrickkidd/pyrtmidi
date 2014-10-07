@@ -22,10 +22,8 @@
 #include "PyMidiMessage.h"
 #include "pkglobals.h"
 #include <queue>
-
-
   
-static PyObject *RtMidiError;
+static PyObject *rtmidi_Error;
 
 typedef struct
 {
@@ -127,13 +125,13 @@ MidiIn_getMessage(MidiIn *self, PyObject *args)
       ms = PyLong_AsLong(timeout);
     else
     {
-      PyErr_Format(RtMidiError, "timeout value must be a number, not %s", timeout->ob_type->tp_name);
+      PyErr_Format(rtmidi_Error, "timeout value must be a number, not %s", timeout->ob_type->tp_name);
       return NULL;
     }
     
     if(ms < 0)
     {
-      PyErr_SetString(RtMidiError, "timeout value must be a positive number");
+      PyErr_SetString(rtmidi_Error, "timeout value must be a positive number");
       return NULL;
     }
   }
@@ -203,44 +201,27 @@ MidiIn_getMessage(MidiIn *self, PyObject *args)
 static PyObject *
 MidiIn_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-  char *name = NULL;
+  RtMidiIn::Api api = RtMidiIn::UNSPECIFIED;
+  char *clientName = "";
+  unsigned int queueSizeLimit = 100;
+  MidiIn *self = NULL;
 
-  if(!PyArg_ParseTuple(args, "|s", &name))
+  if(!PyArg_ParseTuple(args, "|isI", &api, &clientName, &queueSizeLimit))
     return NULL;
-  
-  MidiIn *self;
+
   self = (MidiIn *) type->tp_alloc(type, 0);
   
-  if(self != NULL) 
-  {
-    if (name == NULL)
+  try
     {
-      try
-      {
-        self->rtmidi = new RtMidiIn;
-      }
-      catch(RtError &error)
-      {
-        PyErr_SetString(RtMidiError, error.getMessageString());
-        Py_DECREF(self);
-        return NULL;
-      }
+      self->rtmidi = new RtMidiIn(api, clientName, queueSizeLimit);
     }
-    else
+  catch(RtMidiError &error)
     {
-      try
-      {
-        self->rtmidi = new RtMidiIn(name);
-      }
-      catch(RtError &error)
-      {
-        PyErr_SetString(RtMidiError, error.getMessageString());
-        Py_DECREF(self);
-        return NULL;
-      }
+      PyErr_SetString(rtmidi_Error, error.what());
+      Py_DECREF(self);
+      return NULL;
     }
-  } 
-
+  
 #if PK_WINDOWS
   self->mutex = CreateMutex (0, FALSE, 0);
   self->cond = CreateEvent (0, FALSE, FALSE, 0);
@@ -311,9 +292,9 @@ MidiIn_openPort(MidiIn *self, PyObject *args)
     {
       self->rtmidi->openPort(port);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -324,9 +305,9 @@ MidiIn_openPort(MidiIn *self, PyObject *args)
     {
       self->rtmidi->openPort(port,name);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -352,9 +333,9 @@ MidiIn_openVirtualPort(MidiIn *self, PyObject *args)
     {
       self->rtmidi->openVirtualPort();
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -364,9 +345,9 @@ MidiIn_openVirtualPort(MidiIn *self, PyObject *args)
     {
       self->rtmidi->openVirtualPort(name);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -449,27 +430,13 @@ MidiIn_getPortName(MidiIn *self, PyObject *args)
   {
     name = self->rtmidi->getPortName(port);
   }
-  catch(RtError &error)
+  catch(RtMidiError &error)
   {
-    PyErr_SetString(RtMidiError, error.getMessageString());
+    PyErr_SetString(rtmidi_Error, error.what());
     return NULL;
   }
   
   return Py_BuildValue("s", name.c_str());
-}
-
-
-static PyObject *
-MidiIn_setQueueSizeLimit(MidiIn *self, PyObject *args)
-{
-  unsigned int queueSize;
-  
-  if(!PyArg_ParseTuple(args, "I", &queueSize))
-    return NULL;
-  
-  self->rtmidi->setQueueSizeLimit(queueSize);
-  
-  Py_RETURN_NONE;
 }
 
 
@@ -520,9 +487,6 @@ static PyMethodDef MidiIn_methods[] = {
   
   {"getPortName", (PyCFunction) MidiIn_getPortName, METH_VARARGS,
     "Return a string identifier for the specified MIDI input port number."},
-  
-  {"setQueueSizeLimit", (PyCFunction) MidiIn_setQueueSizeLimit, METH_VARARGS,
-    "Set the maximum number of MIDI messages to be saved in the queue."},
   
   {"ignoreTypes", (PyCFunction) MidiIn_ignoreTypes, METH_VARARGS,
     "Specify whether certain MIDI message types should be queued or ignored "
@@ -613,37 +577,17 @@ MidiOut_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
   if(!PyArg_ParseTuple(args, "|s", &name))
     return NULL;
 
-  MidiOut *self;
-  self = (MidiOut *) type->tp_alloc(type, 0);
-  if(self != NULL) 
-  {
-    if (name == NULL)
+  MidiOut *self = (MidiOut *) type->tp_alloc(type, 0);
+  try
     {
-      try
-      {
-        self->rtmidi = new RtMidiOut;
-      }
-      catch(RtError &error)
-      {
-        PyErr_SetString(RtMidiError, error.getMessageString());
-        Py_DECREF(self);
-        return NULL;
-      }
+      self->rtmidi = new RtMidiOut;
     }
-    else
+  catch(RtMidiError &error)
     {
-      try
-      {
-        self->rtmidi = new RtMidiOut(name);
-      }
-      catch(RtError &error)
-      {
-        PyErr_SetString(RtMidiError, error.getMessageString());
-        Py_DECREF(self);
-        return NULL;
-      }
+      PyErr_SetString(rtmidi_Error, error.what());
+      Py_DECREF(self);
+      return NULL;
     }
-  }    
   return (PyObject *) self;
 }
 
@@ -668,9 +612,9 @@ MidiOut_openPort(MidiOut *self, PyObject *args)
     {
       self->rtmidi->openPort(port);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   else
@@ -679,9 +623,9 @@ MidiOut_openPort(MidiOut *self, PyObject *args)
     {
       self->rtmidi->openPort(port,name);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }  
@@ -704,9 +648,9 @@ MidiOut_openVirtualPort(MidiOut *self, PyObject *args)
     {
       self->rtmidi->openVirtualPort();
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -716,9 +660,9 @@ MidiOut_openVirtualPort(MidiOut *self, PyObject *args)
     {
       self->rtmidi->openVirtualPort(name);
     }
-    catch(RtError &error)
+    catch(RtMidiError &error)
     {
-      PyErr_SetString(RtMidiError, error.getMessageString());
+      PyErr_SetString(rtmidi_Error, error.what());
       return NULL;
     }
   }
@@ -756,9 +700,9 @@ MidiOut_getPortName(MidiOut *self, PyObject *args)
   {
     name = self->rtmidi->getPortName(port);
   }
-  catch(RtError &error)
+  catch(RtMidiError &error)
   {
-    PyErr_SetString(RtMidiError, error.getMessageString());
+    PyErr_SetString(rtmidi_Error, error.what());
     return NULL;
   }
   
@@ -776,7 +720,7 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   
   if(!PyMidiMessage_Check(a0))
   {
-    PyErr_SetString(RtMidiError, "argument 1 must be of type MidiMessage");
+    PyErr_SetString(rtmidi_Error, "argument 1 must be of type MidiMessage");
     return NULL;
   }
   
@@ -791,9 +735,9 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   {
     self->rtmidi->sendMessage(&outMessage);
   }
-  catch(RtError &error)
+  catch(RtMidiError &error)
   {
-    PyErr_SetString(RtMidiError, error.getMessageString());
+    PyErr_SetString(rtmidi_Error, error.what());
     return NULL;
   }
   
@@ -938,6 +882,27 @@ PyMODINIT_FUNC initrtmidi(void)
   
   Py_INCREF(&MidiOut_type);
   PyModule_AddObject(module, "RtMidiOut", (PyObject *)&MidiOut_type);
+
+  /*
+  PyObject *tp_dict = PyModule_GetDict(module);
+  PyObject *PyRtMidiIn = PyDict_GetItemString(tp_dict, "RtMidiIn");
+  PyObject *PyRtMidiOut = PyDict_GetItemString(tp_dict, "RtMidiOut");
+  */
+  PyObject *inDict = MidiIn_type.tp_dict;
+  PyObject *outDict = MidiOut_type.tp_dict;
+
+  PyDict_SetItemString(inDict, "UNSPECIFIED", PyLong_FromLong(RtMidi::UNSPECIFIED));
+  PyDict_SetItemString(outDict, "UNSPECIFIED", PyLong_FromLong(RtMidi::UNSPECIFIED));
+  PyDict_SetItemString(inDict, "MACOSX_CORE", PyLong_FromLong(RtMidi::MACOSX_CORE));
+  PyDict_SetItemString(outDict, "MACOSX_CORE", PyLong_FromLong(RtMidi::MACOSX_CORE));
+  PyDict_SetItemString(inDict, "LINUX_ALSA", PyLong_FromLong(RtMidi::LINUX_ALSA));
+  PyDict_SetItemString(outDict, "LINUX_ALSA", PyLong_FromLong(RtMidi::LINUX_ALSA));
+  PyDict_SetItemString(inDict, "UNIX_JACK", PyLong_FromLong(RtMidi::UNIX_JACK));
+  PyDict_SetItemString(outDict, "UNIX_JACK", PyLong_FromLong(RtMidi::UNIX_JACK));
+  PyDict_SetItemString(inDict, "WINDOWS_MM", PyLong_FromLong(RtMidi::WINDOWS_MM));
+  PyDict_SetItemString(outDict, "WINDOWS_MM", PyLong_FromLong(RtMidi::WINDOWS_MM));
+  PyDict_SetItemString(inDict, "RTMIDI_DUMMY", PyLong_FromLong(RtMidi::RTMIDI_DUMMY));
+  PyDict_SetItemString(outDict, "RTMIDI_DUMMY", PyLong_FromLong(RtMidi::RTMIDI_DUMMY));
   
   char eName[32];
 #if PK_WINDOWS
@@ -945,9 +910,9 @@ PyMODINIT_FUNC initrtmidi(void)
 #else
   strcpy(eName, "rtmidi.Error");
 #endif
-  RtMidiError = PyErr_NewException(eName, NULL, NULL);
-  Py_INCREF(RtMidiError);
-  PyModule_AddObject(module, "Error", RtMidiError);  
+  rtmidi_Error = PyErr_NewException(eName, NULL, NULL);
+  Py_INCREF(rtmidi_Error);
+  PyModule_AddObject(module, "Error", rtmidi_Error);  
 
 #if PK_PYTHON3
     return module;
