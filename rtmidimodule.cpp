@@ -33,7 +33,6 @@ typedef struct
   PyObject *callback;
   long calling_thread_id;
   std::queue<MidiMessage *> *m_q;
-  bool triggered;
 
 #if PK_WINDOWS
   HANDLE mutex;
@@ -45,7 +44,27 @@ typedef struct
     
 } MidiIn;
 
-
+const char *MidiMessage_str(const MidiMessage *m) {
+  static char s[256];
+  if(m->isNoteOn()) {
+    sprintf(s, "<NOTE ON, %s (note %d), velocity: %d, channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getVelocity(), m->getChannel());
+  } else if(m->isNoteOff()) {
+    sprintf(s, "<NOTE OFF, %s (%d), channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getChannel());
+  } else if(m->isProgramChange()) {
+    sprintf(s, "<PROGRAM CHANGE: program: %d, channel: %d>", m->getProgramChangeNumber(), m->getChannel());
+  } else if(m->isPitchWheel()) {
+    sprintf(s, "<PITCH WHEEL: value: %d, channel: %d>", m->getPitchWheelValue(), m->getChannel());
+  } else if(m->isAftertouch()) {
+    sprintf(s, "<AFTERTOUCH: value: %d, channel: %d>", m->getAfterTouchValue(), m->getChannel());
+  } else if(m->isChannelPressure()) {
+    sprintf(s, "<CHANNEL PRESSURE: pressure: %d, channel: %d>", m->getChannelPressureValue(), m->getChannel());
+  } else if(m->isController()) {
+    sprintf(s, "<CONTROLLER: \"%s\" (CC %d), value: %d, channel: %d>", m->getControllerName(m->getControllerNumber()), m->getControllerNumber(), m->getControllerValue(), m->getChannel());
+  } else {
+    sprintf(s, "<MidiMessage (misc type)>");
+  }
+   return s;
+}
   
 static void MidiIn_callback(double timestamp, std::vector<unsigned char> *message, void *opaque)
 {
@@ -56,7 +75,7 @@ static void MidiIn_callback(double timestamp, std::vector<unsigned char> *messag
     data[i] = (*message)[i];  
   MidiMessage inMidi(data, (int) message->size(), timestamp);
   free(data);
-
+  
 #if PK_WINDOWS
   WaitForSingleObject(self->mutex, INFINITE);
 #else
@@ -90,7 +109,6 @@ static void MidiIn_callback(double timestamp, std::vector<unsigned char> *messag
   else
   {
     self->m_q->push(new MidiMessage(inMidi));
-    self->triggered = true;
   }
   
 #if PK_WINDOWS
@@ -141,9 +159,9 @@ MidiIn_getMessage(MidiIn *self, PyObject *args)
 #else
   pthread_mutex_lock(&self->mutex);    
 #endif
-  
-  if(ms > -1 && self->triggered == false)
-  { 
+
+  if(self->m_q->size() == 0 && ms > -1)
+  {
     PyThreadState *_save = PyEval_SaveThread();
 
 #if PK_WINDOWS
@@ -182,7 +200,6 @@ MidiIn_getMessage(MidiIn *self, PyObject *args)
     MidiMessage *inMidi = self->m_q->front();
     (*((PyMidiMessage *)result)->m) = (*inMidi);
     self->m_q->pop();
-    self->triggered = false;
     delete inMidi;
   }    
 
