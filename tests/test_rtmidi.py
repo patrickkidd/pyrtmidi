@@ -22,6 +22,7 @@ BUILD_PATHS = [os.path.join(os.getcwd(), 'build/lib.linux-x86_64-2.4/'),
                os.path.join(os.getcwd(), 'build/lib.darwin-8.5.0-Power_Macintosh-2.3/'),
                os.path.join(os.getcwd(), 'build/lib.darwin-8.8.1-i386-2.3/'),
                os.path.join(os.getcwd(), 'build/lib.macosx-10.6-universal-2.6/'),
+               os.path.join(os.getcwd(), 'build/lib.macosx-10.9-x86_64-3.4'),
                ]
 sys.path = BUILD_PATHS + sys.path
 
@@ -46,8 +47,8 @@ class RtMidiInTest(unittest.TestCase):
         
     def test_blocking(self):
         """ test blocking reads. """
-        self.rtmidi.openPort(0, True)
-        print 'move a MIDI device to send some data...'
+        self.rtmidi.openPort(0)
+        print('move a MIDI device to send some data...')
         m1 = self.rtmidi.getMessage()
         m2 = self.rtmidi.getMessage()
         m3 = self.rtmidi.getMessage()
@@ -56,9 +57,9 @@ class RtMidiInTest(unittest.TestCase):
     def test_non_blocking(self):
         """ test non-blocking reads. """
         self.rtmidi.openPort(1)
-        self.rtmidi.getMessage()
-        self.rtmidi.getMessage()
-        self.rtmidi.getMessage()
+        self.rtmidi.getMessage(0)
+        self.rtmidi.getMessage(0)
+        self.rtmidi.getMessage(0)
         self.rtmidi.closePort()
     
 import time
@@ -70,7 +71,7 @@ class RtMidiOutTest(unittest.TestCase):
         vi = rtmidi.RtMidiOut()
         vi.openVirtualPort('myport')
         while 1:
-#            print 'sending ',
+#            print('sending ')
 #            sys.stdout.flush()
             vi.sendMessage(0xF8)
             time.sleep(.016)
@@ -89,17 +90,20 @@ class RtMidiOutTest(unittest.TestCase):
             self.rtmidi.getPortName(i)
 
 
-def print_ports(device):
 
+
+def print_ports(device):
     ports = range(device.getPortCount())
     if ports:
         for i in ports:
-            print 'MIDI IN:',device.getPortName(i)
+            print('   ', device.getPortName(i))
     else:
-        print 'NO MIDI PORTS!'
+        print('NO MIDI PORTS!')
 
 
 if __name__ == '__main__':
-    #print_ports(rtmidi.RtMidiIn())
-    #print_ports(rtmidi.RtMidiOut())
+    print("MIDI IN PORTS:")
+    print_ports(rtmidi.RtMidiIn())
+    print("MIDI OUT PORTS:")
+    print_ports(rtmidi.RtMidiOut())
     unittest.main()
