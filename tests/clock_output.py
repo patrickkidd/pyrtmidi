@@ -1,5 +1,5 @@
 #!/usr/bin/env pkpython
-#   Copyright (C) 2011 by Patrick Stinson                                 
+#   Copyright (C) 2014 by Patrick Stinson                                 
 #   patrickkidd@gmail.com                                                   
 #                                                                         
 #   This program is free software; you can redistribute it and/or modify  
@@ -20,8 +20,8 @@
 import sys
 import rtmidi
 import threading
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 
 MIDI_CLOCK = 0xF8
@@ -82,7 +82,9 @@ class RtMidiClock(MidiClock):
         self.lock.release()
 
     def send(self, *args):
-        self.dev.sendMessage(*args)
+        print("CREATE: %s" % args)
+        m = rtmidi.MidiMessage(*args)
+        self.dev.sendMessage(m)
 
 
 class ClockWidget(QWidget):
@@ -97,12 +99,9 @@ class ClockWidget(QWidget):
 
         self.clock = clock
 
-        QObject.connect(self.slider, SIGNAL('valueChanged(int)'),
-                        self.setTempo)
-        QObject.connect(self.startButton, SIGNAL('clicked()'),
-                        self.clock.startClock)
-        QObject.connect(self.stopButton, SIGNAL('clicked()'),
-                        self.clock.stopClock)
+        self.slider.valueChanged[int].connect(self.setTempo)
+        self.startButton.clicked.connect(self.clock.startClock)
+        self.stopButton.clicked.connect(self.clock.stopClock)
 
         self.slider.setRange(4000, 21000)
         self.slider.setValue(14000)
@@ -137,5 +136,5 @@ if __name__ == '__main__':
     clock = RtMidiClock()
     w = ClockWidget(clock)
     w.show()
-    app.exec_()
+    app.exec()
     clock.quit()

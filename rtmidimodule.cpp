@@ -1,5 +1,5 @@
 /*
- #   Copyright (C) 2011 by Patrick Stinson                                 
+ #   Copyright (C) 2014 by Patrick Stinson                                 
  #   patrickkidd@gmail.com                                                   
  #                                                                         
  #   This program is free software; you can redistribute it and/or modify  
@@ -219,7 +219,7 @@ static PyObject *
 MidiIn_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
   RtMidiIn::Api api = RtMidiIn::UNSPECIFIED;
-  char *clientName = "";
+  char *clientName = (char *) ""; // avoid clang warnings;
   unsigned int queueSizeLimit = 100;
   MidiIn *self = NULL;
 
@@ -376,6 +376,14 @@ MidiIn_openVirtualPort(MidiIn *self, PyObject *args)
 }
   
 
+static PyObject *
+MidiIn_isPortOpen(MidiIn *self, PyObject *args)
+{
+  if(self->rtmidi->isPortOpen())
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
 
 
 static PyObject *
@@ -489,6 +497,9 @@ static PyMethodDef MidiIn_methods[] = {
   {"openVirtualPort", (PyCFunction) MidiIn_openVirtualPort, METH_VARARGS,
     "Create a virtual input port, with optional name, to allow software "
     "connections (OS X and ALSA only)."},
+  
+  {"isPortOpen", (PyCFunction) MidiIn_isPortOpen, METH_NOARGS,
+    "Returns true if a port is open and false if not."},
   
   {"setCallback", (PyCFunction) MidiIn_setCallback, METH_VARARGS,
     "Set a callback function to be invoked for incoming MIDI messages."},
@@ -650,6 +661,15 @@ MidiOut_openPort(MidiOut *self, PyObject *args)
   return Py_None;
 }
 
+static PyObject *
+MidiOut_isPortOpen(MidiOut *self, PyObject *args)
+{
+  if(self->rtmidi->isPortOpen())
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
 
 static PyObject *
 MidiOut_openVirtualPort(MidiOut *self, PyObject *args)
@@ -734,18 +754,30 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   PyObject *a0 = NULL;
   if(PyArg_ParseTuple(args, "O", &a0) == 0)
     return NULL;
-  
-  if(!PyMidiMessage_Check(a0))
-  {
-    PyErr_SetString(rtmidi_Error, "argument 1 must be of type MidiMessage");
-    return NULL;
-  }
-  
-  PyMidiMessage *midi = (PyMidiMessage *) a0;
+
+  MidiMessage *created = NULL; // delete if set
+  MidiMessage *midi = NULL;
+  if(PyMidiMessage_Check(a0))
+    {
+      midi = ((PyMidiMessage *) a0)->m;
+    }
+  else if(PyLong_Check(a0))
+    {
+      PyErr_SetString(rtmidi_Error, "long ctor args not supported yet.");
+      return NULL;
+      int i0 = (int) PyLong_AsUnsignedLong(a0);
+      printf("MidiOut_sendMessage: %i\n", i0);
+      midi = created = new MidiMessage(i0);
+    }
+  else
+    {
+      PyErr_SetString(rtmidi_Error, "argument 1 must be of type MidiMessage or a number.");
+      return NULL;
+    }
   
   std::vector<unsigned char> outMessage;
-  uint8 *data = midi->m->getRawData();
-  for(int i=0; i < midi->m->getRawDataSize(); ++i)
+  uint8 *data = midi->getRawData();
+  for(int i=0; i < midi->getRawDataSize(); ++i)
     outMessage.push_back((unsigned char) data[i]);
   
   try
@@ -755,9 +787,11 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
   catch(RtMidiError &error)
   {
     PyErr_SetString(rtmidi_Error, error.what());
+    if(created) delete created;
     return NULL;
   }
   
+  if(created) delete created;
   Py_RETURN_NONE;
 }
 
@@ -768,6 +802,9 @@ static PyMethodDef MidiOut_methods[] = {
   {"openVirtualPort", (PyCFunction) MidiOut_openVirtualPort, METH_VARARGS,
     "Create a virtual input port, with optional name, to allow software "
     "connections (OS X and ALSA only)."},
+  
+  {"isPortOpen", (PyCFunction) MidiOut_isPortOpen, METH_NOARGS,
+    "Returns true if a port is open and false if not."},
   
   {"closePort", (PyCFunction) MidiOut_closePort, METH_NOARGS,
     "Close an open MIDI connection (if one exists)."},

@@ -1,5 +1,5 @@
 #!/bin/env python
-#   Copyright (C) 2011 by Patrick Stinson                                 
+#   Copyright (C) 2014 by Patrick Stinson                                 
 #   patrickkidd@gmail.com                                                   
 #                                                                         
 #   This program is free software; you can redistribute it and/or modify  
@@ -39,6 +39,7 @@ if OSNAME == 'Linux':
 elif OSNAME == 'Darwin':
     define_macros = [('__MACOSX_CORE__', '')]
     libraries = ['pthread']
+    extra_compile_args = []
     extra_link_args = ['-framework', 'CoreAudio',
                        '-framework', 'CoreMidi',
                        '-framework', 'CoreFoundation']    

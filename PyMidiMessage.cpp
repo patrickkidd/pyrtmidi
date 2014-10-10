@@ -1,5 +1,5 @@
  /*
- #   Copyright (C) 2011 by Patrick Stinson                                 
+ #   Copyright (C) 2014 by Patrick Stinson                                 
  #   patrickkidd@gmail.com                                                   
  #                                                                         
  #   This program is free software; you can redistribute it and/or modify  
@@ -51,16 +51,16 @@ PyMidiMessage_dealloc(PyMidiMessage* self)
 static PyObject *
 PyMidiMessage_new(PyTypeObject *type, PyObject *, PyObject *)
 {
-  PyMidiMessage *self;
-  
-  
+  PyMidiMessage *self;  
+  int arg1 = -1;
+
   self = (PyMidiMessage *)type->tp_alloc(type, 0);
 
-  if(self != NULL)
-  {
-    self->m = new MidiMessage(0xb0, 123 & 127, 0); // (dummy) all notes off
-  }
+  if(self == NULL)
+    return NULL;
 
+  self->m = new MidiMessage(0xb0, 123 & 127, 0); // (dummy) all notes off
+  
   return (PyObject *)self;
 }
 
