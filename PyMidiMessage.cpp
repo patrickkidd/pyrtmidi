@@ -49,17 +49,33 @@ PyMidiMessage_dealloc(PyMidiMessage* self)
 }
 
 static PyObject *
-PyMidiMessage_new(PyTypeObject *type, PyObject *, PyObject *)
+PyMidiMessage_new(PyTypeObject *type, PyObject *args, PyObject *)
 {
   PyMidiMessage *self;  
-  int arg1 = -1;
+//  int arg1 = -1;
 
   self = (PyMidiMessage *)type->tp_alloc(type, 0);
-
   if(self == NULL)
     return NULL;
 
+  PyObject *other = NULL;
+  if(args && !PyArg_ParseTuple(args, "|O", &other))
+    return NULL;
+
+
+  if(other && !PyMidiMessage_Check(other))
+  {
+    PyErr_SetString(PyExc_ValueError, "constructor argument must be a MidiMessage.");
+    return NULL;
+  }
+
   self->m = new MidiMessage(0xb0, 123 & 127, 0); // (dummy) all notes off
+
+  if(other && PyMidiMessage_Check(other))
+  {
+    PyMidiMessage *pyOther = (PyMidiMessage *) other;
+    *self->m = *pyOther->m;
+  }
   
   return (PyObject *)self;
 }

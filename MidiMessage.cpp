@@ -1158,16 +1158,25 @@ const char *MidiMessage::getControllerName (int n) throw()
         "Poly Operation"
     };
 
-    return (((unsigned int) n) < 128) ? names[n] : 0;
+    const char *ret = ( ((unsigned int) n) < 128) ? names[n] : "";
+    if(ret != 0)
+      return ret;
+    else
+      return "";
 }
 
 bool MidiMessage::operator==(const MidiMessage &other) const throw() {
   if(size != other.size)
+  {
+//    printf("MidiMessage::operator==() False (size)\n");
     return false;
+  }
   for(int i=0; i < size; i++) {
     if(data[i] != other.data[i]) {
+//      printf("MidiMessage::operator==() False (data %i)\n", i);
       return false;
     }
   }
+//  printf("MidiMessage::operator==() True\n");
   return true;
 }

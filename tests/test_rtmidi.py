@@ -17,19 +17,56 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.  
 
 import os, sys, imp, time
-
-BUILD_PATHS = [os.path.join(os.getcwd(), 'build/lib.linux-x86_64-2.4/'),
-               os.path.join(os.getcwd(), 'build/lib.darwin-8.5.0-Power_Macintosh-2.3/'),
-               os.path.join(os.getcwd(), 'build/lib.darwin-8.8.1-i386-2.3/'),
-               os.path.join(os.getcwd(), 'build/lib.macosx-10.6-universal-2.6/'),
-               os.path.join(os.getcwd(), 'build/lib.macosx-10.9-x86_64-3.4'),
-               ]
-sys.path = BUILD_PATHS + sys.path
-bleh = imp.find_module('rtmidi')
-print('%s: Using rtmidi module at:' % __name__, bleh[1])
-
 import unittest
-import rtmidi
+import rtmidi_shim
+from rtmidi import *
+
+class TestMidimessage(unittest.TestCase):
+
+    def test_statics(self):
+        ctls = [
+            "Bank Select", "Modulation Wheel (coarse)", "Breath controller (coarse)",
+            "", "Foot Pedal (coarse)", "Portamento Time (coarse)",
+            "Data Entry (coarse)", "Volume (coarse)", "Balance (coarse)",
+            "", "Pan position (coarse)", "Expression (coarse)", "Effect Control 1 (coarse)",
+            "Effect Control 2 (coarse)", "", "", "General Purpose Slider 1", "General Purpose Slider 2",
+            "General Purpose Slider 3", "General Purpose Slider 4", "", "", "", "", "", "", "", "",
+            "", "", "", "", "Bank Select (fine)", "Modulation Wheel (fine)", "Breath controller (fine)",
+            "", "Foot Pedal (fine)", "Portamento Time (fine)", "Data Entry (fine)", "Volume (fine)",
+            "Balance (fine)", "", "Pan position (fine)", "Expression (fine)", "Effect Control 1 (fine)",
+            "Effect Control 2 (fine)", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+            "Hold Pedal (on/off)", "Portamento (on/off)", "Sustenuto Pedal (on/off)", "Soft Pedal (on/off)",
+            "Legato Pedal (on/off)", "Hold 2 Pedal (on/off)", "Sound Variation", "Sound Timbre",
+            "Sound Release Time", "Sound Attack Time", "Sound Brightness", "Sound Control 6",
+            "Sound Control 7", "Sound Control 8", "Sound Control 9", "Sound Control 10",
+            "General Purpose Button 1 (on/off)", "General Purpose Button 2 (on/off)",
+            "General Purpose Button 3 (on/off)", "General Purpose Button 4 (on/off)",
+            "", "", "", "", "", "", "", "Reverb Level", "Tremolo Level",  "Chorus Level", "Celeste Level",
+            "Phaser Level", "Data Button increment", "Data Button decrement", "Non-registered Parameter (fine)",
+            "Non-registered Parameter (coarse)", "Registered Parameter (fine)", "Registered Parameter (coarse)",
+            "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "All Sound Off", "All Controllers Off",
+            "Local Keyboard (on/off)", "All Notes Off", "Omni Mode Off", "Omni Mode On", "Mono Operation",
+            "Poly Operation"
+        ]
+        for i, v in enumerate(ctls):
+            self.assertEqual(MidiMessage.getControllerName(i), v)
+        # crash test
+        self.assertEqual(MidiMessage.getControllerName(-1), '')
+        self.assertEqual(MidiMessage.getControllerName(128), '')
+
+
+    def test_operators(self):
+        m1 = MidiMessage.noteOn(1, 100, 120)
+        m2 = MidiMessage.noteOn(1, 100, 120)
+        self.assertEqual(m1, m2)
+        m3 = MidiMessage.noteOn(1, 101, 120)
+        self.assertNotEqual(m1, m3)
+
+    def __test_copy(self):
+        m1 = Midimessage.noteOn(5, 123, 45)
+        print('here')
+        m2 = MidiMessage(m1)
+        self.assertEqual(m1, m2)
 
 
 def SenderProc(iq, oq, portName):
@@ -39,7 +76,7 @@ def SenderProc(iq, oq, portName):
         if s != x:
             print("%s: OH SHIT (wait_for() %s != %s)" % (__name__, s, x))
 
-    device = rtmidi.RtMidiOut()
+    device = RtMidiOut()
     if DEBUG: print('%s: OPENING %s' % (__name__, portName))
     device.openVirtualPort(portName)
 
@@ -51,7 +88,7 @@ def SenderProc(iq, oq, portName):
     for i in range(128):
         for j in range(1, 128):
             if DEBUG: print("%s: Note %i %i" % (__name__, i, j))
-            m = rtmidi.MidiMessage.noteOn(1, i, j)
+            m = MidiMessage.noteOn(1, i, j)
             device.sendMessage(m)
             wait_for('next')
             total += 1
@@ -59,7 +96,7 @@ def SenderProc(iq, oq, portName):
     for i in range(128):
         for j in range(128):
             if DEBUG: print("%s: CC %i %i" % (__name__, i, j))
-            m = rtmidi.MidiMessage.controllerEvent(1, i, j)
+            m = MidiMessage.controllerEvent(1, i, j)
             device.sendMessage(m)
             wait_for('next')
             total += 1
@@ -79,7 +116,7 @@ class TransmissionTest(unittest.TestCase):
 
         iq = mp.Queue()
         oq = mp.Queue()
-        portName = 'rtmidi.TestVirtualPorts.%i' % time.time()
+        portName = 'TestVirtualPorts.%i' % time.time()
         senderProc = mp.Process(target=SenderProc, args=(oq, iq, portName))
         senderProc.start()
 
@@ -89,7 +126,7 @@ class TransmissionTest(unittest.TestCase):
         # Supposedly you can't just open a virtual port by name from
         # within the same proc or proc group? Anyway opening by index
         # works.
-        device = rtmidi.RtMidiIn()
+        device = RtMidiIn()
         for i in range(device.getPortCount()):
             if device.getPortName(i) == portName:
                 device.openPort(i)
@@ -148,7 +185,7 @@ def print_ports(device):
 
 if __name__ == '__main__':
 #    print("MIDI IN PORTS:")
-#    print_ports(rtmidi.RtMidiIn())
+#    print_ports(RtMidiIn())
 #    print("MIDI OUT PORTS:")
-#    print_ports(rtmidi.RtMidiOut())
+#    print_ports(RtMidiOut())
     unittest.main()
