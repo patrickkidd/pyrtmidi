@@ -54,7 +54,6 @@ class TestMidimessage(unittest.TestCase):
         self.assertEqual(MidiMessage.getControllerName(-1), '')
         self.assertEqual(MidiMessage.getControllerName(128), '')
 
-
     def test_operators(self):
         m1 = MidiMessage.noteOn(1, 100, 120)
         m2 = MidiMessage.noteOn(1, 100, 120)

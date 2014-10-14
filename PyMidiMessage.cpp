@@ -695,9 +695,16 @@ PyMidiMessage_str(PyObject *self) {
   MidiMessage *m = ((PyMidiMessage*)self)->m;
   static char s[256];
   if(m->isNoteOn()) {
-    sprintf(s, "<NOTE ON, %s (note %d), velocity: %d, channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getVelocity(), m->getChannel());
+    sprintf(s, "<NOTE ON, note: %d (%s), velocity: %d, channel: %d>",
+            m->getNoteNumber(),
+            m->getMidiNoteName(m->getNoteNumber(), true, true, 3),
+            m->getVelocity(),
+            m->getChannel());
   } else if(m->isNoteOff()) {
-    sprintf(s, "<NOTE OFF, %s (%d), channel: %d>", m->getMidiNoteName(m->getNoteNumber(), true, true, 0), m->getNoteNumber(), m->getChannel());
+    sprintf(s, "<NOTE OFF, note: %d (%s), channel: %d>",
+            m->getNoteNumber(),
+            m->getMidiNoteName(m->getNoteNumber(), true, true, 3),
+            m->getChannel());
   } else if(m->isProgramChange()) {
     sprintf(s, "<PROGRAM CHANGE: program: %d, channel: %d>", m->getProgramChangeNumber(), m->getChannel());
   } else if(m->isPitchWheel()) {
@@ -707,7 +714,20 @@ PyMidiMessage_str(PyObject *self) {
   } else if(m->isChannelPressure()) {
     sprintf(s, "<CHANNEL PRESSURE: pressure: %d, channel: %d>", m->getChannelPressureValue(), m->getChannel());
   } else if(m->isController()) {
-    sprintf(s, "<CONTROLLER: \"%s\" (CC %d), value: %d, channel: %d>", m->getControllerName(m->getControllerNumber()), m->getControllerNumber(), m->getControllerValue(), m->getChannel());
+    const char *name = m->getControllerName(m->getControllerNumber());
+    if(strlen(name) > 0) {
+      sprintf(s, "<CONTROLLER: %d (\"%s\"), value: %d, channel: %d>",
+              m->getControllerNumber(),
+              m->getControllerName(m->getControllerNumber()),
+              m->getControllerValue(),
+              m->getChannel());
+    } else {
+      sprintf(s, "<CONTROLLER: %d, value: %d, channel: %d>",
+              m->getControllerNumber(),
+              m->getControllerName(m->getControllerNumber()),
+              m->getControllerValue(),
+              m->getChannel());
+    }
   } else {
     sprintf(s, "<MidiMessage (misc type)>");
   }
@@ -920,7 +940,7 @@ static PyMethodDef PyMidiMessage_methods[] = {
 #if PK_PYTHON3
 static PyTypeObject PyMidiMessage_Type = {
   PyVarObject_HEAD_INIT(NULL, 0)
-  "ousiainternal.MidiMessage", /* tp_name */
+  "rtmidi.MidiMessage", /* tp_name */
   sizeof(PyMidiMessage),     /* tp_basicsize */
   0,                         /* tp_itemsize */
   (destructor)PyMidiMessage_dealloc, /* tp_dealloc */
@@ -962,7 +982,7 @@ static PyTypeObject PyMidiMessage_Type = {
 static PyTypeObject PyMidiMessage_Type = {
   PyObject_HEAD_INIT(NULL)
   0,                         /*ob_size*/
-  "ousiainternal.MidiMessage",  /*tp_name*/
+  "rtmidi.MidiMessage",  /*tp_name*/
   sizeof(PyMidiMessage),     /*tp_basicsize*/
   0,                         /*tp_itemsize*/
   (destructor) PyMidiMessage_dealloc,    /*tp_dealloc*/

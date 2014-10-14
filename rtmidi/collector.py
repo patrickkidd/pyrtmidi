@@ -11,26 +11,29 @@ class Collector(threading.Thread):
 
     def run(self):
         self.running = True
-        print("Collector.start: " + self.portName)
+#        print("Collector.start: " + self.portName)
         while self.running:
             msg = self.device.getMessage(100)
             if msg:
                 self.callback(self, msg)
-        print("Collector.exiting: " + self.portName)
+#        print("Collector.exiting: " + self.portName)
 
     def stop(self):
-        print("Collector.stop: " + self.portName)
+#        print("Collector.stop: " + self.portName)
         self.running = False
 
 
 class CollectorBin(threading.Thread):
+
+    _bin = []
+
     def __init__(self, callback=None):
         threading.Thread.__init__(self)
         self.collectors = {}
         for i in range(rtmidi.RtMidiIn().getPortCount()):
             device = rtmidi.RtMidiIn()
             portName = device.getPortName(i)
-            print('OPENING', portName)
+#            print('OPENING', portName)
             device.openPort(i)
             collector = Collector(device, callback and callback or self._callback)
             collector.portName = portName
@@ -40,6 +43,7 @@ class CollectorBin(threading.Thread):
                 'queue': []
             }
             self.cond = threading.Condition()
+        CollectorBin._bin.append(self)
 
     # not thread safe!
     def _is_item_available(self):
@@ -53,7 +57,7 @@ class CollectorBin(threading.Thread):
             self.collectors[collector.portName]['queue'].append(msg)
             self.cond.notify()
 
-    def run(self):
+    def run(self):        
         try:
             self.running = True
             while self.running:
@@ -66,7 +70,7 @@ class CollectorBin(threading.Thread):
                             print('%s: %s' % (k, msg))
 
         except KeyboardInterrupt:
-            print("EXITING...")
+#            print("EXITING...")
             return
 
     def start(self):
@@ -84,4 +88,10 @@ class CollectorBin(threading.Thread):
     def joinAll(self):
         for k, v in self.collectors.items():
             v['collector'].join()
+
+    @staticmethod
+    def cleanup():
+        for c in CollectorBin._bin:
+            c.stop()
+            CollectorBin._bin.remove(c)            
 
