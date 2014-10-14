@@ -24,7 +24,7 @@ class Collector(threading.Thread):
 
 
 class CollectorBin(threading.Thread):
-    def __init__(self):
+    def __init__(self, callback=None):
         threading.Thread.__init__(self)
         self.collectors = {}
         for i in range(rtmidi.RtMidiIn().getPortCount()):
@@ -32,7 +32,7 @@ class CollectorBin(threading.Thread):
             portName = device.getPortName(i)
             print('OPENING', portName)
             device.openPort(i)
-            collector = Collector(device, self._callback)
+            collector = Collector(device, callback and callback or self._callback)
             collector.portName = portName
             self.collectors[portName] = {
                 'collector': collector,

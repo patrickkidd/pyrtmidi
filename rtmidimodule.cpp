@@ -894,9 +894,9 @@ static struct PyModuleDef moduledef = {
 #endif
 
 #if PK_PYTHON3
-PyMODINIT_FUNC PyInit_rtmidi(void) 
+PyMODINIT_FUNC PyInit__rtmidi(void) 
 #else
-PyMODINIT_FUNC initrtmidi(void) 
+PyMODINIT_FUNC init_rtmidi(void) 
 #endif
 {
   PyEval_InitThreads();

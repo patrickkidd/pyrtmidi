@@ -20,9 +20,8 @@ if OSNAME == 'Windows':
         os.path.relpath('C:\Python34\Lib\site-packages\PyQt5\LibEGL.dll')
     ]
 
-
 base = None
-# Comment out for a console app
+# Uncomment for a GUI-only (no console) app
 #if sys.platform == "win32":
 #    base = "Win32GUI"
 
@@ -33,5 +32,5 @@ setup(  name = "PKMidiStroke",
         version = "0.1",
         description = "Trigger the triggers!",
         options = {"build_exe": build_exe_options},
-        executables = [Executable("pkechomidi.py", base=base)],
+        executables = [Executable("pkechomidi", base=base)],
         data_files=get_data_files())

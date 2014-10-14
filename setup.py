@@ -56,7 +56,7 @@ elif OSNAME == 'Irix':
 if sys.version_info >= (3,0):
 	define_macros.append(('OUSIA_SCRIPT_PYTHON3','1'))
 	
-midi = Extension('rtmidi',
+midi = Extension(name='rtmidi._rtmidi',
                  sources=['RtMidi.cpp',
                           'MidiMessage.cpp',
                           'PyMidiMessage.cpp',
@@ -66,12 +66,15 @@ midi = Extension('rtmidi',
                  libraries=libraries,
                  define_macros=define_macros,
                  extra_link_args = extra_link_args,
-				 extra_compile_args = extra_compile_args
+                 extra_compile_args = extra_compile_args
                  )
 
 
 setup(name = 'rtmidi',
       version = '0.2',
       description = 'Python RtMidi interface',
-      ext_modules = [midi])
+      ext_modules = [midi],
+      packages = ['rtmidi'],
+      scripts = ['pkechomidi']
+  )
 
