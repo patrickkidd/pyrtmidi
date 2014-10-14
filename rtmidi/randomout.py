@@ -9,9 +9,29 @@ class RandomOut(threading.Thread):
         random.seed(time.time())
 
     def get(self):
-        key = int(random.random() * 100)
-        vel = int(random.random() * 100)
-        msg = rtmidi.MidiMessage.noteOn(1, key, vel)
+        a = int(random.random() * 128)
+        b = int(random.random() * 128)
+        c = int(random.random() * 10)
+        if c == 0:
+            msg = rtmidi.MidiMessage.noteOn(1, a, b)
+        elif c == 1:
+            msg = rtmidi.MidiMessage.noteOff(1, a)
+        elif c == 2:
+            msg = rtmidi.MidiMessage.controllerEvent(1, a, b)
+        elif c == 3:
+            msg = rtmidi.MidiMessage.aftertouchChange(1, a, b)
+        elif c == 4:
+            msg = rtmidi.MidiMessage.channelPressureChange(1, a)
+        elif c == 5:
+            msg = rtmidi.MidiMessage.programChange(1, a)
+        elif c == 6:
+            msg = rtmidi.MidiMessage.pitchWheel(1, a)
+        elif c == 7:
+            msg = rtmidi.MidiMessage.allNotesOff(1)
+        elif c == 8:
+            msg = rtmidi.MidiMessage.allSoundOff(1)
+        elif c == 9:
+            msg = rtmidi.MidiMessage.allControllersOff(1)
         return msg
 
     def run(self):

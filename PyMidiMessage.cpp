@@ -710,7 +710,11 @@ PyMidiMessage_str(PyObject *self) {
   } else if(m->isPitchWheel()) {
     sprintf(s, "<PITCH WHEEL: value: %d, channel: %d>", m->getPitchWheelValue(), m->getChannel());
   } else if(m->isAftertouch()) {
-    sprintf(s, "<AFTERTOUCH: value: %d, channel: %d>", m->getAfterTouchValue(), m->getChannel());
+    sprintf(s, "<AFTERTOUCH: note: %d (%s) value: %d, channel: %d>",
+            m->getNoteNumber(),
+            m->getMidiNoteName(m->getNoteNumber(), true, true, 3),
+            m->getAfterTouchValue(),
+            m->getChannel());
   } else if(m->isChannelPressure()) {
     sprintf(s, "<CHANNEL PRESSURE: pressure: %d, channel: %d>", m->getChannelPressureValue(), m->getChannel());
   } else if(m->isController()) {
