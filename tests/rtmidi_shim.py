@@ -4,6 +4,8 @@ BUILD_PATHS = [os.path.join(os.getcwd(), 'build/lib.linux-x86_64-2.4/'),
                os.path.join(os.getcwd(), 'build/lib.darwin-8.8.1-i386-2.3/'),
                os.path.join(os.getcwd(), 'build/lib.macosx-10.6-universal-2.6/'),
                os.path.join(os.getcwd(), 'build/lib.macosx-10.9-x86_64-3.4'),
+               os.path.join(os.getcwd(), 'build/lib.macosx-10.10-intel-2.6'),
+               os.path.join(os.getcwd(), 'build/lib.macosx-10.10-intel-2.7')
                ]
 sys.path = BUILD_PATHS + sys.path
 bleh = imp.find_module('rtmidi')

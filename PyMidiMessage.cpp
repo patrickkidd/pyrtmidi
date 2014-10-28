@@ -742,8 +742,10 @@ PyMidiMessage_str(PyObject *self) {
 PyObject *PyMidiMessage___eq__(PyObject *self, PyObject *other, int op) {
 
   PyObject *result = NULL;
-  
-  if(!PyMidiMessage_Check(other)) {
+
+  if(other == Py_None) {
+    result = Py_False;
+  } else if(!PyMidiMessage_Check(other)) {
     result = Py_False;
   } else {
     MidiMessage &me = *((PyMidiMessage *) self)->m;

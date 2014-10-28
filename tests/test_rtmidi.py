@@ -58,14 +58,15 @@ class TestMidimessage(unittest.TestCase):
         m1 = MidiMessage.noteOn(1, 100, 120)
         m2 = MidiMessage.noteOn(1, 100, 120)
         self.assertEqual(m1, m2)
+
         m3 = MidiMessage.noteOn(1, 101, 120)
         self.assertNotEqual(m1, m3)
 
-    def __test_copy(self):
-        m1 = Midimessage.noteOn(5, 123, 45)
-        print('here')
+    def test_copy(self):
+        m1 = MidiMessage.noteOn(5, 123, 45)
         m2 = MidiMessage(m1)
         self.assertEqual(m1, m2)
+        self.assertEqual(m1.getChannel(), m2.getChannel())
 
 
 def SenderProc(iq, oq, portName):
@@ -111,7 +112,8 @@ class TransmissionTest(unittest.TestCase):
 
     def test_transmission(self):
         import multiprocessing as mp
-        mp.set_start_method('spawn')
+        if hasattr(mp, 'set_start_method'):
+            mp.set_start_method('spawn')
 
         iq = mp.Queue()
         oq = mp.Queue()
@@ -148,7 +150,7 @@ class TransmissionTest(unittest.TestCase):
         for i in range(128):
             for j in range(1, 128):
                 msg = device.getMessage(1000)
-                self.assertIsNotNone(msg)
+                self.assertTrue(msg is not None)
                 self.assertTrue(msg.isNoteOn())
                 self.assertEqual(msg.getNoteNumber(), i)
                 self.assertEqual(msg.getVelocity(), j)
@@ -158,7 +160,7 @@ class TransmissionTest(unittest.TestCase):
         for i in range(128):
             for j in range(128):
                 msg = device.getMessage(1000)
-                self.assertIsNotNone(msg)
+                self.assertTrue(msg is not None)
                 self.assertTrue(msg.isController())
                 self.assertEqual(msg.getControllerNumber(), i)
                 self.assertEqual(msg.getControllerValue(), j)

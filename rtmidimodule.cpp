@@ -925,7 +925,7 @@ PyMODINIT_FUNC init_rtmidi(void)
 #if PK_PYTHON3
   module = PyModule_Create(&moduledef);
 #else
-  module = Py_InitModule3("rtmidi", midi_methods, "RtMidi wrapper");
+  module = Py_InitModule3("rtmidi._rtmidi", midi_methods, "RtMidi wrapper");
 #endif
   
   Py_INCREF((PyObject*) getMidiMessageType());
