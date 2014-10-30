@@ -1171,10 +1171,16 @@ bool MidiMessage::operator==(const MidiMessage &other) const throw() {
 //    printf("MidiMessage::operator==() False (size)\n");
     return false;
   }
-  for(int i=0; i < size; i++) {
-    if(data[i] != other.data[i]) {
-//      printf("MidiMessage::operator==() False (data %i)\n", i);
-      return false;
+  if(isNoteOff() && other.isNoteOff()) {
+    // avoid note-on / note-off confusion
+    return (getNoteNumber() == other.getNoteNumber());
+  } else {
+    for(int i=0; i < size; i++) {
+      if(data[i] != other.data[i]) {
+//        printf("MidiMessage::operator==() False (data %i: %i != %i)\n",
+//               i, data[i], other.data[i]);
+        return false;
+      }
     }
   }
 //  printf("MidiMessage::operator==() True\n");
