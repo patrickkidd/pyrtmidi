@@ -33,6 +33,7 @@ extra_link_args = []
 extra_compile_args = []
 library_dirs = []
 
+
 if OSNAME == 'Linux':
     define_macros=[("__LINUX_ALSASEQ__", '')]
     libraries = ['asound', 'pthread']
@@ -47,14 +48,13 @@ elif OSNAME == 'Windows':
     define_macros = [('__WINDOWS_MM__', ''),
                      ('PK_WINDOWS', '1')]
     library_dirs = ['C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib']
-    libraries = ['winmm']
+    libraries = ['winmm', 'python34']
     extra_compile_args=['/EHsc']
 elif OSNAME == 'Irix':
     define_macros = [('__IRIX_MD__', '')]
     libraries = ['pthread', 'md']
 
-if sys.version_info >= (3,0):
-	define_macros.append(('OUSIA_SCRIPT_PYTHON3','1'))
+#if sys.version_info >= (3,0):
 	
 midi = Extension(name='rtmidi._rtmidi',
                  sources=['RtMidi.cpp',

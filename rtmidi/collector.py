@@ -42,7 +42,7 @@ class CollectorBin(threading.Thread):
                 'name': portName,
                 'queue': []
             }
-            self.cond = threading.Condition()
+        self.cond = threading.Condition()
         CollectorBin._bin.append(self)
 
     # not thread safe!

@@ -893,8 +893,9 @@ static struct PyModuleDef moduledef = {
 #define PyMODINIT_FUNC void
 #endif
 
+
 #if PK_PYTHON3
-PyMODINIT_FUNC PyInit__rtmidi(void) 
+PyMODINIT_FUNC PyInit__rtmidi(void)
 #else
 PyMODINIT_FUNC init_rtmidi(void) 
 #endif
@@ -937,11 +938,6 @@ PyMODINIT_FUNC init_rtmidi(void)
   Py_INCREF(&MidiOut_type);
   PyModule_AddObject(module, "RtMidiOut", (PyObject *)&MidiOut_type);
 
-  /*
-  PyObject *tp_dict = PyModule_GetDict(module);
-  PyObject *PyRtMidiIn = PyDict_GetItemString(tp_dict, "RtMidiIn");
-  PyObject *PyRtMidiOut = PyDict_GetItemString(tp_dict, "RtMidiOut");
-  */
   PyObject *inDict = MidiIn_type.tp_dict;
   PyObject *outDict = MidiOut_type.tp_dict;
 
@@ -972,3 +968,4 @@ PyMODINIT_FUNC init_rtmidi(void)
     return module;
 #endif  
 }
+
