@@ -32,7 +32,7 @@
 #endif
 
 
-#define pkassert(expression)           { if (! (expression)) printf("MidiMessage assertion: %s:%i\n", __FILE__, __LINE__); }
+#define pkassert(expression)           { /*if (! (expression)) printf("MidiMessage assertion: %s:%i\n", __FILE__, __LINE__);*/ }
 
 template <class Type>
 inline Type pklimit (const Type lowerLimit,
