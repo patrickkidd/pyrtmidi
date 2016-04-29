@@ -51,7 +51,10 @@ class CollectorBin(threading.Thread):
         if iPort is None:
             return
         if rtmidi.DEBUG: print('rtmidi.Collector.addCollector', portName, iPort)
-        device.openPort(i)
+        try:
+            device.openPort(i)
+        except:
+            return
         collector = Collector(device, self._callback)
         collector.portName = portName
         self.collectors[portName] = {
