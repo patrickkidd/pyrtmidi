@@ -7,6 +7,7 @@ try:
 except ImportError:
     pass
 import rtmidi
+#import rtmidi._rtmidi
 
 def callback(collector, msg):
     print("%s: %s" % (collector.portName, msg))

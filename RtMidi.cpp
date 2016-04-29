@@ -2101,6 +2101,7 @@ void MidiInWinMM :: openPort( unsigned int portNumber, const std::string /*portN
     return;
   }
 
+  printf("rtmidi.RtMidiIn: OPENING PORT %i: %s\n", portNumber, getPortName(portNumber).c_str());
   WinMidiData *data = static_cast<WinMidiData *> (apiData_);
   MMRESULT result = midiInOpen( &data->inHandle,
                                 portNumber,
@@ -2108,11 +2109,16 @@ void MidiInWinMM :: openPort( unsigned int portNumber, const std::string /*portN
                                 (DWORD_PTR)&inputData_,
                                 CALLBACK_FUNCTION );
   if ( result != MMSYSERR_NOERROR ) {
+    if(result == MMSYSERR_ALLOCATED) printf("MMSYSERR_ALLOCATED: %i\n", MMSYSERR_ALLOCATED);
+    if(result == MMSYSERR_BADDEVICEID) printf("MMSYSERR_BADDEVICEID: %i\n", MMSYSERR_BADDEVICEID);
+    if(result == MMSYSERR_INVALFLAG) printf("MMSYSERR_INVALFLAG: %i\n", MMSYSERR_INVALFLAG);
+    if(result == MMSYSERR_INVALPARAM) printf("MMSYSERR_INVALPARAM: %i\n", MMSYSERR_INVALPARAM);
+    if(result == MMSYSERR_NOMEM) printf("MMSYSERR_NOMEM: %i\n", MMSYSERR_NOMEM);
     errorString_ = "MidiInWinMM::openPort: error creating Windows MM MIDI input port.";
     error( RtMidiError::DRIVER_ERROR, errorString_ );
     return;
   }
-
+  printf("SUCCESS OPENING PORT %i: %s\n", portNumber, getPortName(portNumber).c_str());
   // Allocate and init the sysex buffers.
   for ( int i=0; i<RT_SYSEX_BUFFER_COUNT; ++i ) {
     data->sysexBuffer[i] = (MIDIHDR*) new char[ sizeof(MIDIHDR) ];

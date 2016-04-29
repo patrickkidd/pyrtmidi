@@ -10,7 +10,7 @@ else:
 
 # Dependencies are automatically detected, but it might need fine tuning.
 build_exe_options = {
-    "packages": ["os"],
+    "packages": ["os", 'rtmidi'],
     "excludes": ["tkinter"],
     "include_files": []
 }
