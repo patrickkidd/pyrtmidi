@@ -1,11 +1,13 @@
 pyrtmidi
 ========
 
-Realtime MIDI I/O for python.
+Realtime MIDI I/O for Python on Windows, OS X, and Linux. Includes comprehensive MidiMessage class, support for virtual ports on OS X and Linux, and multi-threaded lister utility classes.
+
+Pyrtmidi provides MIDI I/O for [PKMidiCron](http://vedanamedia.com/our-products/pkmidicron/).
 
 Changes
 -------------
-0.2 - Finished port to Python3 / Windows 7.
+0.2 - Finished port to Python3 / Windows 7-10.
 
 
 Usage
