@@ -765,9 +765,11 @@ MidiOut_sendMessage(MidiOut *self, PyObject *args)
     {
       PyErr_SetString(rtmidi_Error, "long ctor args not supported yet.");
       return NULL;
+      /*
       int i0 = (int) PyLong_AsUnsignedLong(a0);
       printf("MidiOut_sendMessage: %i\n", i0);
       midi = created = new MidiMessage(i0);
+      */
     }
   else
     {

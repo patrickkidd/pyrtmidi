@@ -88,6 +88,21 @@ class TestMidimessage(unittest.TestCase):
         self.assertEqual(m1, m2)
         self.assertEqual(m1.getChannel(), m2.getChannel())
 
+    def test_raw(self):
+        m1 = MidiMessage.noteOn(5, 123, 45)
+        data = m1.getRawData()
+        size = m1.getRawDataSize()
+        self.assertEqual(size, len(data))
+        m2 = MidiMessage(data)
+        self.assertEqual(m1, m2)
+        #
+        m1 = MidiMessage.controllerEvent(12, 123, 45)
+        data = m1.getRawData()
+        size = m1.getRawDataSize()
+        self.assertEqual(size, len(data))
+        m2 = MidiMessage(data)
+        self.assertEqual(m1, m2)
+
 
 def SenderProc(iq, oq, portName):
     DEBUG = 0
@@ -190,9 +205,6 @@ class TransmissionTest(unittest.TestCase):
         self.assertEqual(len(self.messages), 32640)
         oq.put('done')
         
-
-
-
 
 
 def print_ports(device):

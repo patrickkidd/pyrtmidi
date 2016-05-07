@@ -58,7 +58,7 @@ The API is copied *near* verbatim from the C++ code. Refer to the [RtMidi tutori
 
 *MidiMessage*
 
-This class has been taken from the juce library, and includes an excellent comprehensive set of midi functions. [please check here for available methods](http://rawmaterialsoftware.com/juce/api/classMidiMessage.html).
+This class has been taken from the juce library, and includes an excellent comprehensive set of midi functions. [please check here for available methods](https://www.juce.com/doc/classMidiMessage).
 
 *Recipes*
 

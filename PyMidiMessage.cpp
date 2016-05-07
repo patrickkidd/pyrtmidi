@@ -51,33 +51,111 @@ PyMidiMessage_dealloc(PyMidiMessage* self)
 static PyObject *
 PyMidiMessage_new(PyTypeObject *type, PyObject *args, PyObject *)
 {
-  PyMidiMessage *self;  
-//  int arg1 = -1;
+  PyMidiMessage *self;
+  PyObject *bytes = NULL;
+  char *bytesStr = NULL;
+  int iNumBytes = NULL;
+  double timeStamp = NULL;
+
+  PyObject *a1 = NULL, *a2 = NULL, *a3 = NULL;
 
   self = (PyMidiMessage *)type->tp_alloc(type, 0);
   if(self == NULL)
     return NULL;
 
-  PyObject *other = NULL;
-  if(args && !PyArg_ParseTuple(args, "|O", &other))
-    return NULL;
-
-
-  if(other && !PyMidiMessage_Check(other))
-  {
-    PyErr_SetString(PyExc_ValueError, "constructor argument must be a MidiMessage.");
-    return NULL;
-  }
-
-  self->m = new MidiMessage(0xb0, 123 & 127, 0); // (dummy) all notes off
-
-  if(other && PyMidiMessage_Check(other))
-  {
-    PyMidiMessage *pyOther = (PyMidiMessage *) other;
-    *self->m = *pyOther->m;
+  if(args) {
+    if(PyTuple_GET_SIZE(args) == 1) { // either bytes as raw data or copy ctor
+      a1 = PyTuple_GET_ITEM(args, 0);
+      if(PyBytes_Check(a1)) {
+        bytes = a1;
+        bytesStr = PyBytes_AsString(bytes);
+        iNumBytes = PyBytes_GET_SIZE(bytes);
+        self->m = new MidiMessage((const uint8 *) bytesStr, (const int) iNumBytes);
+      } else if(PyMidiMessage_Check(a1)) {
+        self->m = new MidiMessage(0xb0, 123 & 127, 0); // all notes off (dummy)
+        PyMidiMessage *pyOther = (PyMidiMessage *) a1;
+        *(self->m) = *(pyOther->m);
+      } else {
+        PyArg_ParseTuple(args, "O|O", &a1, &a2, &a3); // just set exception
+        return NULL;
+      }
+    } else if(PyTuple_GET_SIZE(args) == 2) {
+      if(!PyArg_ParseTuple(args, "Sd", &bytes, &timeStamp)) {
+        return NULL;
+      }
+      bytesStr = PyBytes_AsString(bytes);
+      iNumBytes = PyBytes_GET_SIZE(bytes);
+      self->m = new MidiMessage((const uint8 *) bytesStr, (const int) iNumBytes, (const double) timeStamp);
+    } else {
+      self->m = new MidiMessage(0xb0, 123 & 127, 0); // all notes off
+    }
+  } else {
+      self->m = new MidiMessage(0xb0, 123 & 127, 0); // all notes off
   }
   
   return (PyObject *)self;
+
+/*      
+      a1 = PyTuple_GET_ITEM(args, 0);
+      if(PyBytes_Check(a1)) {
+        char *s = PyBytes_AsString(a1);
+      }
+      PyArg_ParseTuple(args, "S", data, &timeStamp);
+    } else if(PyTuple_GET_SIZE(args) == 2) {
+      if(PyBytes_Check(a1)) {
+        int size = PyBytes_GET_SIZE(a1);
+        char *s = PyBytes_AsString(a1);
+        self->m = new MidiMessage((const uint8 *) s, (const int) size, (const double) timeStamp);
+      }
+      
+        self->m = new MidiMessage((const uint8 *) s, (const int) size, (const double) timeStamp);
+      PyArg_ParseTuple(args, "Sd", data, &timeStamp);
+    }
+  }
+
+  if(args) {
+    printf("here: %p, %i %i\n", args, PyArg_ParseTuple(args, "Si|d", &data, &iNumBytes, &timeStamp), PyArg_ParseTuple(args, "|O", &other));
+    if(!PyArg_ParseTuple(args, "Si|d", &data, &iNumBytes, &timeStamp) &&
+       !PyArg_ParseTuple(args, "|O", &other)) {
+      return NULL;
+    }
+  } else {
+    printf("here: %p\n", args);
+  }  
+  
+  // create from default ctor
+  if(args == NULL) {
+    self->m = new MidiMessage(0xb0, 123 & 127, 0); // all notes off
+  } else {
+    // create from raw data
+    if(PyArg_ParseTuple(args, "Si|d", &data, &iNumBytes, &timeStamp)) {
+      char *s = PyByteArray_AsString(data);
+      if(timeStamp) {
+        self->m = new MidiMessage((const uint8 *) s, (const int) iNumBytes, (const double) timeStamp);
+      } else {
+        self->m = new MidiMessage((const uint8 *) s, (const int) iNumBytes);
+      }
+    } else if(PyArg_ParseTuple(args, "|O", &other)) {
+      // create from copy ctor
+      if(other) {
+        if(PyMidiMessage_Check(other)) {
+      printf("here 1\n");
+          self->m = new MidiMessage(0xb0, 123 & 127, 0); // all notes off (dummy)
+          PyMidiMessage *pyOther = (PyMidiMessage *) other;
+          *self->m = *pyOther->m;
+      printf("here 2: %p\n", self);
+        } else {
+          PyErr_SetString(PyExc_ValueError, "copy constructor argument must be a MidiMessage.");
+          Py_DECREF(self);
+          self = NULL;
+        }
+      }
+    }
+  }
+
+  printf("return: %p\n", self);
+  return (PyObject *)self;
+*/
 }
 
 static int
@@ -324,6 +402,12 @@ PyMidiMessage_getRawData(PyMidiMessage *self, PyObject *)
 #else
   return PyString_FromStringAndSize((const char *) __midi->getRawData(), __midi->getRawDataSize());
 #endif  
+}
+
+static PyObject *
+PyMidiMessage_getRawDataSize(PyMidiMessage *self, PyObject *)
+{
+  return PK_INT(__midi->getRawDataSize());
 }
 
 static PyObject *
@@ -728,7 +812,6 @@ PyMidiMessage_str(PyObject *self) {
     } else {
       sprintf(s, "<CONTROLLER: %d, value: %d, channel: %d>",
               m->getControllerNumber(),
-              m->getControllerName(m->getControllerNumber()),
               m->getControllerValue(),
               m->getChannel());
     }
@@ -773,8 +856,6 @@ PyObject *PyMidiMessage___eq__(PyObject *self, PyObject *other, int op) {
 
 /* TODO: 
  
-  getRawData()
-  getRawDataSize()
   getSysExData()
   getSysExDataSize()
   programChange()
@@ -862,6 +943,8 @@ static PyMethodDef PyMidiMessage_methods[] = {
     "Returns true if this is an active-sense message." },
   {"getRawData", (PyCFunction) PyMidiMessage_getRawData, METH_NOARGS,
     "Returns the raw midi data." },
+  {"getRawDataSize", (PyCFunction) PyMidiMessage_getRawDataSize, METH_NOARGS,
+    "Returns the raw midi data size." },
   {"getSysExData", (PyCFunction) PyMidiMessage_getSysExData, METH_NOARGS,
     "Returns the raw midi data." }, 
   

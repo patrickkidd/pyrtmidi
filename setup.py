@@ -40,7 +40,7 @@ if OSNAME == 'Linux':
 elif OSNAME == 'Darwin':
     define_macros = [('__MACOSX_CORE__', '')]
     libraries = ['pthread']
-    extra_compile_args = []
+    extra_compile_args = ['-Wno-missing-braces']
     extra_link_args = ['-framework', 'CoreAudio',
                        '-framework', 'CoreMidi',
                        '-framework', 'CoreFoundation']    
@@ -86,6 +86,6 @@ setup(name = 'rtmidi',
       description = 'Python RtMidi interface',
       ext_modules = [midi],
       packages = ['rtmidi'],
-      scripts = ['pkechomidi']
+      scripts = ['pkechomidi.py']
   )
 
