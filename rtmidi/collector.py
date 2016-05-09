@@ -26,6 +26,7 @@ class Collector(threading.Thread):
     def stop(self):
         if rtmidi.DEBUG: print("rtmidi.Collector.stop: " + self.portName)
         self.running = False
+        self.join()
 
 
 class CollectorBin(threading.Thread):
@@ -45,7 +46,7 @@ class CollectorBin(threading.Thread):
         CollectorBin._bin.append(self)
         self.running = False
 
-    def addCollector(self, portName):
+    def addCollector(self, portName, start=False):
         if portName in self.collectors:
             return
         device = rtmidi.RtMidiIn()
@@ -68,8 +69,12 @@ class CollectorBin(threading.Thread):
             'name': portName,
             'queue': []
         }
+        if start:
+            collector.start()
+        return collector
 
     def removeCollector(self, portName):
+        """ stops collector. """
         if not portName in self.collectors:
             return
         if rtmidi.DEBUG: print('rtmidi.Collector.removeCollector', portName)
