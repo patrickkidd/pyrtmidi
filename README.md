@@ -5,11 +5,6 @@ Realtime MIDI I/O for Python on Windows, OS X, and Linux. Includes comprehensive
 
 Pyrtmidi provides MIDI I/O for [PKMidiCron](http://vedanamedia.com/our-products/pkmidicron/).
 
-Changes
--------------
-0.2 - Finished port to Python3 / Windows 7-10.
-
-
 Usage
 -------------
 

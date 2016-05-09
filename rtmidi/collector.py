@@ -8,15 +8,20 @@ class Collector(threading.Thread):
         self.device = device
         self.callback = callback
         self.device.ignoreTypes(True, False, True)
+        self.running = False
 
     def run(self):
-        self.running = True
         if rtmidi.DEBUG: print("rtmidi.Collector.start: " + self.portName)
         while self.running:
             msg = self.device.getMessage(100)
             if msg:
                 self.callback(self, msg)
         if rtmidi.DEBUG: print("rtmidi.Collector.exiting: " + self.portName)
+        self.running = False
+
+    def start(self):
+        self.running = True
+        super().start()
 
     def stop(self):
         if rtmidi.DEBUG: print("rtmidi.Collector.stop: " + self.portName)
@@ -38,6 +43,7 @@ class CollectorBin(threading.Thread):
                 self.addCollector(device.getPortName(i))
         self.cond = threading.Condition()
         CollectorBin._bin.append(self)
+        self.running = False
 
     def addCollector(self, portName):
         if portName in self.collectors:
@@ -62,7 +68,6 @@ class CollectorBin(threading.Thread):
             'name': portName,
             'queue': []
         }
-        collector.start()
 
     def removeCollector(self, portName):
         if not portName in self.collectors:
@@ -82,7 +87,6 @@ class CollectorBin(threading.Thread):
 
     def _callback(self, collector, msg):
         with self.cond:
-            print(self.collectors.keys())
             self.collectors[collector.portName]['queue'].append(msg)
             self.cond.notify()
 
@@ -101,9 +105,12 @@ class CollectorBin(threading.Thread):
             if rtmidi.DEBUG: print("rtmidi.CollectorBin: exiting....")
         except KeyboardInterrupt:
 #            print("EXITING...")
-            return
+            pass
+        self.running = False
 
     def start(self):
+        if self.running:
+            return
         threading.Thread.start(self)
         for k, v in self.collectors.items():
             v['collector'].start()
@@ -121,6 +128,10 @@ class CollectorBin(threading.Thread):
             c = v['collector']
             if c.is_alive():
                 c.join()
+
+    def names(self):
+        """ return a list of open ports. """
+        return list(self.collectors.keys())
 
     @staticmethod
     def cleanup():
