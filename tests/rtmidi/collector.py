@@ -1,7 +1,6 @@
 import rtmidi
 import threading
 
-
 class Collector(threading.Thread):
     def __init__(self, device, callback):
         threading.Thread.__init__(self)
@@ -12,14 +11,12 @@ class Collector(threading.Thread):
         self.running = False
 
     def run(self):
-        if rtmidi.DEBUG:
-            print("rtmidi.Collector.start: " + self.portName)
+        if rtmidi.DEBUG: print("rtmidi.Collector.start: " + self.portName)
         while self.running:
             msg = self.device.getMessage(100)
             if msg:
                 self.callback(self, msg)
-        if rtmidi.DEBUG:
-            print("rtmidi.Collector.exiting: " + self.portName)
+        if rtmidi.DEBUG: print("rtmidi.Collector.exiting: " + self.portName)
         self.running = False
 
     def start(self):
@@ -27,8 +24,7 @@ class Collector(threading.Thread):
         super().start()
 
     def stop(self):
-        if rtmidi.DEBUG:
-            print("rtmidi.Collector.stop: " + self.portName)
+        if rtmidi.DEBUG: print("rtmidi.Collector.stop: " + self.portName)
         self.running = False
         self.join()
 
@@ -42,8 +38,7 @@ class CollectorBin(threading.Thread):
         self._callback = callback and callback or self._callback
         self.collectors = {}
         if autolist:
-            if rtmidi.DEBUG:
-                print("rtmidi.CollectorBin.autolist = True")
+            if rtmidi.DEBUG: print("rtmidi.CollectorBin.autolist = True")
             device = rtmidi.RtMidiIn()
             for i in range(device.getPortCount()):
                 self.addCollector(device.getPortName(i))
@@ -62,8 +57,7 @@ class CollectorBin(threading.Thread):
                 break
         if iPort is None:
             return
-        if rtmidi.DEBUG:
-            print('rtmidi.Collector.addCollector', portName, iPort)
+        if rtmidi.DEBUG: print('rtmidi.Collector.addCollector', portName, iPort)
         try:
             device.openPort(i)
         except:
@@ -81,10 +75,9 @@ class CollectorBin(threading.Thread):
 
     def removeCollector(self, portName):
         """ stops collector. """
-        if portName not in self.collectors:
+        if not portName in self.collectors:
             return
-        if rtmidi.DEBUG:
-            print('rtmidi.Collector.removeCollector', portName)
+        if rtmidi.DEBUG: print('rtmidi.Collector.removeCollector', portName)
         c = self.collectors[portName]['collector']
         c.stop()
         c.join()
@@ -104,8 +97,7 @@ class CollectorBin(threading.Thread):
 
     def run(self):
         try:
-            if rtmidi.DEBUG:
-                print("rtmidi.CollectorBin: running")
+            if rtmidi.DEBUG: print("rtmidi.CollectorBin: running")
             self.running = True
             while self.running:
                 with self.cond:
@@ -115,9 +107,9 @@ class CollectorBin(threading.Thread):
                         while len(q):
                             msg = q.pop(0)
                             print('%s: %s' % (k, msg))
-            if rtmidi.DEBUG:
-                print("rtmidi.CollectorBin: exiting....")
+            if rtmidi.DEBUG: print("rtmidi.CollectorBin: exiting....")
         except KeyboardInterrupt:
+#            print("EXITING...")
             pass
         self.running = False
 

@@ -5,46 +5,36 @@ Realtime MIDI I/O for Python on Windows, OS X, and Linux. Includes comprehensive
 
 Pyrtmidi provides MIDI I/O for [PKMidiCron](http://vedanamedia.com/our-products/pkmidicron/).
 
-Installation
-------------
-
-Install using:
-
-```bash
-pip install rtmidi
-```
-
 Usage
------
+-------------
 
 pyrtmidi is a Python interface to RtMidi. It provides real-time midi input and output.
 
 ```python
 
-import rtmidi
-
-midiin = rtmidi.RtMidiIn()
-
 def print_message(midi):
     if midi.isNoteOn():
-        print('ON: ', midi.getMidiNoteName(midi.getNoteNumber()), midi.getVelocity())
+        print 'ON: ', midi.getMidiNoteName(midi.getNoteNumber()), midi.getVelocity()
     elif midi.isNoteOff():
-        print('OFF:', midi.getMidiNoteName(midi.getNoteNumber()))
+        print 'OFF:', midi.getMidiNoteName(midi.getNoteNumber())
     elif midi.isController():
-        print('CONTROLLER', midi.getControllerNumber(), midi.getControllerValue())
+        print 'CONTROLLER', midi.getControllerNumber(), midi.getControllerValue()
+
+
+import rtmidi
+midiin = rtmidi.RtMidiIn()
 
 ports = range(midiin.getPortCount())
 if ports:
     for i in ports:
-        print(midiin.getPortName(i))
-    print("Opening port 0!") 
-    midiin.openPort(0)
+        print midiin.getPortName(i)
+    midiin.openPort(1)
     while True:
         m = midiin.getMessage(250) # some timeout in ms
-        if m:
+        if m != None:
             print_message(m)
 else:
-    print('NO MIDI INPUT PORTS!')
+    print 'NO MIDI INPUT PORTS!'
 ```
 
 The API is copied *near* verbatim from the C++ code. Refer to the [RtMidi tutorial](http://www.music.mcgill.ca/~gary/rtmidi/), and take into account the following caveats:

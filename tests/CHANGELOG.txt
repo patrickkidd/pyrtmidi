@@ -1,0 +1,4 @@
+Version 1.0
+=========================================
+- Been stable for years, why not bump to 1.0?
+- MidiMessage can now be created from raw data (good for serialization, i.e. for networking)

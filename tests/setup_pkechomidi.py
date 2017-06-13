@@ -1,4 +1,5 @@
 import os
+import sys
 from cx_Freeze import setup, Executable
 
 
@@ -21,17 +22,15 @@ if OSNAME == 'Windows':
 
 base = None
 # Uncomment for a GUI-only (no console) app
-# if sys.platform == "win32":
-#     base = "Win32GUI"
-
+#if sys.platform == "win32":
+#    base = "Win32GUI"
 
 def get_data_files():
     return [('', [''])]
 
-
-setup(name="PKMidiStroke",
-      version="0.1",
-      description="Trigger the triggers!",
-      options={"build_exe": build_exe_options},
-      executables=[Executable("pkechomidi", base=base)],
-      data_files=get_data_files())
+setup(  name = "PKMidiStroke",
+        version = "0.1",
+        description = "Trigger the triggers!",
+        options = {"build_exe": build_exe_options},
+        executables = [Executable("pkechomidi", base=base)],
+        data_files=get_data_files())
