@@ -1,8 +1,6 @@
 import threading
 import rtmidi
-import random
-import time
-
+import random, time
 
 class RandomOut(threading.Thread):
     def __init__(self, device=None):
@@ -41,6 +39,7 @@ class RandomOut(threading.Thread):
             return
         random.seed(time.time())
         while True:
+            print('SENDING: %s' % msg)
             msg = self.get()
             self.device.sendMessage(msg)
             ts = random.random() * 2
