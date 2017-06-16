@@ -62,10 +62,18 @@ CPP_FNAMES = ['RtMidi.cpp',
               'rtmidimodule.cpp',
               ]
 
+CPP_HEADERS = ['RtMidi.h',
+               'pkglobals.h',
+               'MidiMessage.h',
+               'PyMidiMessage.h'
+               ]
+
 cpp_sources = [os.path.join(CPP_SRC_DIR, fname) for fname in CPP_FNAMES]
+cpp_headers = [os.path.join(CPP_SRC_DIR, fname) for fname in CPP_HEADERS]
 
 midi = Extension(name='rtmidi._rtmidi',
                  sources=cpp_sources,
+                 headers=cpp_headers,
                  library_dirs=library_dirs,
                  libraries=libraries,
                  define_macros=define_macros,
