@@ -1,2 +1,0 @@
-recursive-include cpp_src 
-include pkechomidi.py setup_pkechomidi.py
