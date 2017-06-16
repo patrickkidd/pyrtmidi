@@ -1,5 +1,5 @@
 #!/bin/env python
-#   Copyright (C) 2014 by Patrick Stinson                                 
+#   Copyright (C) 2017 by Patrick Stinson                                 
 #   patrickkidd@gmail.com                                                   
 #                                                                         
 #   This program is free software; you can redistribute it and/or modify  
@@ -82,8 +82,32 @@ midi = Extension(name='rtmidi._rtmidi',
 
 
 setup(name = 'rtmidi',
-      version = '2.0',
-      description = 'Python RtMidi interface',
+      version = '2.2',
+      description = """Python RtMidi interface
+def print_message(midi):
+    if midi.isNoteOn():
+        print 'ON: ', midi.getMidiNoteName(midi.getNoteNumber()), midi.getVelocity()
+    elif midi.isNoteOff():
+        print 'OFF:', midi.getMidiNoteName(midi.getNoteNumber())
+    elif midi.isController():
+        print 'CONTROLLER', midi.getControllerNumber(), midi.getControllerValue()
+
+
+import rtmidi
+midiin = rtmidi.RtMidiIn()
+
+ports = range(midiin.getPortCount())
+if ports:
+    for i in ports:
+        print midiin.getPortName(i)
+    midiin.openPort(1)
+    while True:
+        m = midiin.getMessage(250) # some timeout in ms
+        if m != None:
+            print_message(m)
+else:
+    print 'NO MIDI INPUT PORTS!'
+""",
       ext_modules = [midi],
       packages = ['rtmidi'],
       scripts = ['pkechomidi.py']

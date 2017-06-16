@@ -2,7 +2,7 @@
 MidiMessage.cpp
 PyMidiMessage.cpp
 RtMidi.cpp
-pkechomidi
+pkechomidi.py
 rtmidimodule.cpp
 setup.py
 rtmidi/__init__.py
