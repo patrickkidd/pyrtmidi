@@ -600,18 +600,15 @@ MidiOut_dealloc(MidiOut *self)
 static PyObject *
 MidiOut_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-  RtMidiOut::Api api = RtMidiOut::UNSPECIFIED;
-  char *clientName = (char *) ""; // avoid clang warnings;
-  MidiOut *self = NULL;
+  char *name = NULL;
 
-  if(!PyArg_ParseTuple(args, "|is", &api, &clientName))
+  if(!PyArg_ParseTuple(args, "|s", &name))
     return NULL;
 
-  self = (MidiOut *) type->tp_alloc(type, 0);
-
+  MidiOut *self = (MidiOut *) type->tp_alloc(type, 0);
   try
     {
-      self->rtmidi = new RtMidiOut(api, clientName);
+      self->rtmidi = new RtMidiOut;
     }
   catch(RtMidiError &error)
     {
