@@ -36,7 +36,7 @@ library_dirs = []
 
 
 if OSNAME == 'Linux':
-    define_macros = [("__LINUX_ALSA__", '')]
+    define_macros = [('__LINUX_ALSA__', '')]
     libraries = ['asound', 'pthread']
 elif OSNAME == 'Darwin':
     define_macros = [('__MACOSX_CORE__', '')]
@@ -54,6 +54,11 @@ elif OSNAME == 'Windows':
 elif OSNAME == 'Irix':
     define_macros = [('__IRIX_MD__', '')]
     libraries = ['pthread', 'md']
+
+if '--jack-midi' in argv:
+    define_macros.append(('__UNIX_JACK__', ''))
+    libraries.append('jack')
+    argv.pop(argv.index('--jack-midi'))
 
 CPP_SRC_DIR = 'cpp_src'
 CPP_FNAMES = ['RtMidi.cpp',
