@@ -19,7 +19,7 @@
 
 
 
-import os
+import os, sys
 from distutils.core import setup, Extension
 
 if hasattr(os, 'uname'):
