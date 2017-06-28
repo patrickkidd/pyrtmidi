@@ -36,7 +36,7 @@ library_dirs = []
 
 
 if OSNAME == 'Linux':
-    define_macros = [("__LINUX_ALSASEQ__", '')]
+    define_macros = [("__LINUX_ALSA__", '')]
     libraries = ['asound', 'pthread']
 elif OSNAME == 'Darwin':
     define_macros = [('__MACOSX_CORE__', '')]
