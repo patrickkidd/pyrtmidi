@@ -91,7 +91,7 @@ setup(name='rtmidi',
       author_email='patrickkidd@gmail.com',
       url='https://github.com/patrickkidd/pyrtmidi',
       keywords=['midi audio hardware'],
-      version='2.3.1',
+      version='2.3.2',
       description = """Python RtMidi interface
 def print_message(midi):
     if midi.isNoteOn():
