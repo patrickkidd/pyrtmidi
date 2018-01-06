@@ -1,0 +1,7 @@
+HOW TO UPDATE PYPI
+==============================================
+- bump version # in setup.py
+- update download_url in setup.py
+- update changelog
+- # python setup.py sdist
+- # twine upload dist/x.y.z.tar.gz
