@@ -1,5 +1,5 @@
 #!/bin/env python
-#   Copyright (C) 2017 by Patrick Stinson                                 
+#   Copyright (C) 2018 by Patrick Stinson                                 
 #   patrickkidd@gmail.com                                                   
 #                                                                         
 #   This program is free software; you can redistribute it and/or modify  
@@ -90,6 +90,7 @@ setup(name='rtmidi',
       author='Patrick Stinson',
       author_email='patrickkidd@gmail.com',
       url='https://github.com/patrickkidd/pyrtmidi',
+      download_url='https://github.com/patrickkidd/pyrtmidi/tarball/2.3.2',
       keywords=['midi audio hardware'],
       version='2.3.2',
       description = """Python RtMidi interface

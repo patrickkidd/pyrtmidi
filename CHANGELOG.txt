@@ -1,3 +1,7 @@
+Version 2.3.2
+=========================================
+- Fixed bug where noteOn would always set channel to zero on linux.
+
 Version 2.2
 =========================================
 
