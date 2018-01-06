@@ -16,13 +16,20 @@
 #   Free Software Foundation, Inc.,
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import sys
+import os, sys
 import time
 import unittest
 from rtmidi import MidiMessage, RtMidiOut, RtMidiIn
 
 
 class TestMidimessage(unittest.TestCase):
+
+    def test_noteOnChannel(self):
+        """ https://github.com/patrickkidd/pyrtmidi/issues/13 """
+        m = MidiMessage.noteOn(10, 12, 13)
+        self.assertEqual(m.getChannel(), 10)
+        self.assertEqual(m.getNoteNumber(), 12)
+        self.assertEqual(m.getVelocity(), 13)
 
     def test_statics(self):
         ctls = [
@@ -106,10 +113,16 @@ class TestMidimessage(unittest.TestCase):
 
 
 def SenderProc(iq, oq, portName):
+    try:
+        do_SenderProc(iq, oq, portName)
+    except:
+        pass
+
+def do_SenderProc(iq, oq, portName):
     DEBUG = 0
 
     def wait_for(x):
-        s = iq.get()
+        s = iq.get(block=True, timeout=2)
         if s != x:
             print("%s: OH SHIT (wait_for() %s != %s)" % (__name__, s, x))
 
@@ -210,6 +223,9 @@ class TransmissionTest(unittest.TestCase):
 
         self.assertEqual(len(self.messages), 32640)
         oq.put('done')
+
+if os.uname()[0] != 'Darwin':
+    TransmissionTest = None
 
 
 def print_ports(device):
