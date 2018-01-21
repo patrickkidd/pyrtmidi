@@ -142,6 +142,7 @@ setup(name='rtmidi',
       author='Patrick Stinson',
       author_email='patrickkidd@gmail.com',
       url='https://github.com/patrickkidd/pyrtmidi',
+      download_url='https://github.com/patrickkidd/pyrtmidi/tarball/2.3.3',
       keywords=['midi audio hardware'],
       version='2.3.3',
       description = """Python RtMidi interface
