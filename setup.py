@@ -68,33 +68,40 @@ elif OSNAME == 'Windows':
     extra_compile_args = ['/EHsc']
     if sys.version_info >= (3, 5): # Use Visual Studio 14.0
 
+        windowsKitsFolder = "C:/Program Files (x86)/Windows Kits/10/Include/"
+        if os.path.exists(windowsKitsFolder):
+            windowsKitVersions = sorted(os.listdir(windowsKitsFolder))
+            if windowsKitVersions: 
+                lastWindowsKitVersion = windowsKitVersions[-1] # retrieve last Windows Kit version
+ 
+                includes = [
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/exception',          # for "exception" file
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/ucrt/corecrt.h'%lastWindowsKitVersion,  # for corecrt.h
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/um/windows.h'%lastWindowsKitVersion,    # for windows.h
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/shared/winapifamily.h'%lastWindowsKitVersion # for winapifamily.h
+                        ]
+                include_dirs = checkPathsAndGetDirectories(includes)
+                if architecture == "32-bit":
+                    librariesPaths = [    
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/msvcprt.lib',        # for  in 32 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x86/winmm.lib'%lastWindowsKitVersion,    # for  in 32 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x86/ucrt.lib'%lastWindowsKitVersion,  # for   in 32 bit 
+                        ]
+                    library_dirs = checkPathsAndGetDirectories(librariesPaths)
+                    
+                elif architecture == "64-bit":
+                    librariesPaths = [    
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/amd64/msvcprt.lib',  # for  in 64 bit                    
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x64/winmm.lib'%lastWindowsKitVersion,    # for  in 64 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x64/ucrt.lib'%lastWindowsKitVersion,  # for   in 64	bit 
+                        ]
+                    library_dirs = checkPathsAndGetDirectories(librariesPaths)
+            else : 
+                print('ATTENTION the %s folder is empty did you\n%s\ndid you install visual Studio 2017 with the "Python development workload and the Native development tools" option cheked ?'%windowsKitsFolder)
 
-        windowsKitVersion = sorted(os.listdir("C:/Program Files (x86)/Windows Kits/10/Include/"))[-1] # retrieve last Windows Kit version
- 
-        includes = [
-                'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/exception',          # for "exception" file
-                'C:/Program Files (x86)/Windows Kits/10/Include/%s/ucrt/corecrt.h'%windowsKitVersion,  # for corecrt.h
-                'C:/Program Files (x86)/Windows Kits/10/Include/%s/um/windows.h'%windowsKitVersion,    # for windows.h
-                'C:/Program Files (x86)/Windows Kits/10/Include/%s/shared/winapifamily.h'%windowsKitVersion # for winapifamily.h
-                ]
-        include_dirs = checkPathsAndGetDirectories(includes)
-        if architecture == "32-bit":
-            librariesPaths = [    
-                'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/msvcprt.lib',        # for  in 32 bit 
-                'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x86/winmm.lib'%windowsKitVersion,    # for  in 32 bit 
-                'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x86/ucrt.lib'%windowsKitVersion,  # for   in 32 bit 
-                ]
-            library_dirs = checkPathsAndGetDirectories(librariesPaths)
-            
-        elif architecture == "64-bit":
-            librariesPaths = [    
-                'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/amd64/msvcprt.lib',  # for  in 64 bit                    
-                'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x64/winmm.lib'%windowsKitVersion,    # for  in 64 bit 
-                'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x64/ucrt.lib'%windowsKitVersion,  # for   in 64	bit 
-                ]
-            library_dirs = checkPathsAndGetDirectories(librariesPaths)
-                         
- 
+        else : 
+              print('ATTENTION the %s folder do not exists\n%s\ndid you install visual Studio 2017 with the "Python development workload and the Native development tools" option cheked ?'%windowsKitsFolder)
+
     elif sys.version_info >= (3, 3):  # Use Visual Studio 10.0
         pass
     else :   # Use visual Studio 9.0
