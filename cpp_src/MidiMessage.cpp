@@ -1049,7 +1049,7 @@ const char *MidiMessage::getMidiNoteName (int note,
 
     if (((unsigned int) note) < 128)
     {
-      static char buf[4];
+      static char buf[16];
       const char *noteName = (useSharps) ? sharpNoteNames [note % 12] : flatNoteNames [note % 12];
       if (includeOctaveNumber)
         sprintf(buf, "%s%i", noteName, note / 12 + (octaveNumForMiddleC - 5));
