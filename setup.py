@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-		
 #!/bin/env python
-#   Copyright (C) 2018 by Patrick Stinson                                 
+#   Copyright (C) 2018 by Patrick Stinson                                  
 #   patrickkidd@gmail.com                                                   
 #                                                                         
 #   This program is free software; you can redistribute it and/or modify  
@@ -33,7 +34,21 @@ libraries = []
 extra_link_args = []
 extra_compile_args = []
 library_dirs = []
+include_dirs = []
 
+def checkPathsAndGetDirectories(paths):
+    dirs = []
+    missingPaths = []
+    for path in paths : 
+        directory , filename = os.path.split(path) 
+        if os.path.exists(path):
+            dirs.append(directory)
+        else : 
+            missingPaths.append(path)
+    if missingPaths : 
+        print('ATTENTION : Unable to localise :\n%s\ndid you install visual Studio 2017 with the "Python development workload and the Native development tools" option cheked ?'%('\n'.join(missingPaths)))
+    #print('\n'.join(dirs))
+    return(dirs)
 
 if OSNAME == 'Linux':
     define_macros = [('__LINUX_ALSA__', '')]
@@ -46,11 +61,54 @@ elif OSNAME == 'Darwin':
                        '-framework', 'CoreMidi',
                        '-framework', 'CoreFoundation']
 elif OSNAME == 'Windows':
+    architecture = str(sys.maxsize.bit_length() + 1) + "-bit"  # retrieve sur python architecture (32-bit or 64-bit)
     define_macros = [('__WINDOWS_MM__', ''),
                      ('PK_WINDOWS', '1')]
-    library_dirs = ['C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib']
-    libraries = ['winmm', 'python34']
+    libraries = ['winmm', "python" + str(sys.version_info[0]) + str(sys.version_info[1])] # add the good pythonXX
     extra_compile_args = ['/EHsc']
+    if sys.version_info >= (3, 5): # Use Visual Studio 14.0
+
+        windowsKitsFolder = "C:/Program Files (x86)/Windows Kits/10/Include/"
+        if os.path.exists(windowsKitsFolder):
+            windowsKitVersions = sorted(os.listdir(windowsKitsFolder))
+            if windowsKitVersions: 
+                lastWindowsKitVersion = windowsKitVersions[-1] # retrieve last Windows Kit version
+ 
+                includes = [
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/exception',          # for "exception" file
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/ucrt/corecrt.h'%lastWindowsKitVersion,  # for corecrt.h
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/um/windows.h'%lastWindowsKitVersion,    # for windows.h
+                        'C:/Program Files (x86)/Windows Kits/10/Include/%s/shared/winapifamily.h'%lastWindowsKitVersion # for winapifamily.h
+                        ]
+                include_dirs = checkPathsAndGetDirectories(includes)
+                if architecture == "32-bit":
+                    librariesPaths = [    
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/msvcprt.lib',        # for  in 32 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x86/winmm.lib'%lastWindowsKitVersion,    # for  in 32 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x86/ucrt.lib'%lastWindowsKitVersion,  # for   in 32 bit 
+                        ]
+                    library_dirs = checkPathsAndGetDirectories(librariesPaths)
+                    
+                elif architecture == "64-bit":
+                    librariesPaths = [    
+                        'C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/lib/amd64/msvcprt.lib',  # for  in 64 bit                    
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/um/x64/winmm.lib'%lastWindowsKitVersion,    # for  in 64 bit 
+                        'C:/Program Files (x86)/Windows Kits/10/Lib/%s/ucrt/x64/ucrt.lib'%lastWindowsKitVersion,  # for   in 64	bit 
+                        ]
+                    library_dirs = checkPathsAndGetDirectories(librariesPaths)
+            else : 
+                print('ATTENTION the %s folder is empty did you\n%s\ndid you install visual Studio 2017 with the "Python development workload and the Native development tools" option cheked ?'%windowsKitsFolder)
+
+        else : 
+              print('ATTENTION the %s folder do not exists\n%s\ndid you install visual Studio 2017 with the "Python development workload and the Native development tools" option cheked ?'%windowsKitsFolder)
+
+    elif sys.version_info >= (3, 3):  # Use Visual Studio 10.0
+        pass
+    else :   # Use visual Studio 9.0
+        library_dirs = [    
+                'C:/Users/%s/AppData/Local/Programs/Common/Microsoft/Visual C++ for Python/9.0/VC/lib/amd64'% os.environ.get('USERNAME').lower(),  # for msvcprt.lib in 64 bit  
+                ]		
+        print(library_dirs)
 elif OSNAME == 'Irix':
     define_macros = [('__IRIX_MD__', '')]
     libraries = ['pthread', 'md']
@@ -79,6 +137,7 @@ cpp_headers = [os.path.join(CPP_SRC_DIR, fname) for fname in CPP_HEADERS]
 midi = Extension(name='rtmidi._rtmidi',
                  sources=cpp_sources,
                  headers=cpp_headers,
+                 include_dirs = include_dirs,
                  library_dirs=library_dirs,
                  libraries=libraries,
                  define_macros=define_macros,
