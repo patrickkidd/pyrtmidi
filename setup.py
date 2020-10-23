@@ -48,8 +48,8 @@ elif OSNAME == 'Darwin':
 elif OSNAME == 'Windows':
     define_macros = [('__WINDOWS_MM__', ''),
                      ('PK_WINDOWS', '1')]
-    library_dirs = ['C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib']
-    libraries = ['winmm', 'python34']
+    library_dirs = []
+    libraries = ['winmm']
     extra_compile_args = ['/EHsc']
 elif OSNAME == 'Irix':
     define_macros = [('__IRIX_MD__', '')]
