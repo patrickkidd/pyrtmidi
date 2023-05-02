@@ -19,7 +19,7 @@
 
 
 import os, sys
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 
 if hasattr(os, "uname"):
@@ -73,7 +73,10 @@ setup(
     # download_url="https://github.com/patrickkidd/pyrtmidi/tarball/2.3.4",
     keywords=["midi audio hardware"],
     version="2.5.0",
+    description="Realtime MIDI I/O for Python on Windows, OS X, and Linux",
+    description_content_type="text/plain",
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     ext_modules=[
         Extension(
             name="rtmidi._rtmidi",
