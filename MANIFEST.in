@@ -1,2 +1,2 @@
-recursive-include cpp_src *.cpp *.h
+recursive-include src *.cpp *.h
 include pkechomidi.py setup_pkechomidi.py
